@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: mi-casa-inteligente
+    runtime: python
+    buildCommand: "echo 'No build needed'"
+    startCommand: "python server.py"
+    envVars:
+      - key: SP_CLIENT_ID
+        value: 6f85d19e83bb47ac95beb6d94364eff3
+      - key: SP_CLIENT_SECRET
+        value: 4f52890e442848249fc3524fd8ac271c
+      - key: OWM_KEY
+        value: ""   # Agregar tu key de OpenWeatherMap aquí
+    healthCheckPath: /health

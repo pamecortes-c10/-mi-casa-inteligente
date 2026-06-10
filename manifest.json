@@ -1,0 +1,74 @@
+{
+  "name": "Mi Casa Inteligente",
+  "short_name": "Mi Casa",
+  "description": "Control de hogar inteligente — Luces, Clima y Música",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080c14",
+  "theme_color": "#080c14",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "es",
+  "categories": [
+    "utilities",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple touch icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Luces",
+      "short_name": "Luces",
+      "description": "Control de iluminación",
+      "url": "/?tab=lights",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Música",
+      "short_name": "Música",
+      "description": "Control de Spotify",
+      "url": "/?tab=spotify",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Clima",
+      "short_name": "Clima",
+      "description": "Ver el clima",
+      "url": "/?tab=weather",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
