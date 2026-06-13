@@ -18,6 +18,7 @@
 <link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
@@ -492,7 +493,6 @@
     </div>
     <div class="btn-row" style="margin-top:24px;">
       <button class="btn btn-primary btn-lg" style="flex:1;" onclick="saveConfig()">Guardar y continuar →</button>
-      <button class="btn btn-lg" onclick="skipConfig()">Modo Demo</button>
     </div>
   </div>
 </div>
@@ -527,7 +527,7 @@
     <button class="nav-btn" onclick="navigate('lights',this)"><span class="nav-icon">💡</span>Iluminación</button>
     <button class="nav-btn" onclick="navigate('weather',this)"><span class="nav-icon">🌤</span>Clima</button>
     <button class="nav-btn" onclick="navigate('spotify',this)"><span class="nav-icon">🎵</span>Música</button>
-    <button class="nav-btn" onclick="document.getElementById('configOverlay').style.display='flex'"><span class="nav-icon">⚙️</span>Config</button>
+
   </div>
 
   <!-- ═══════════════════════════════════ HOME ═══════════════════════════════════ -->
@@ -721,8 +721,12 @@
               <span style="color:var(--text2);">Conexión</span>
               <span class="badge badge-green"><span class="badge-dot"></span><span id="sonoff-conn-status">Conectado</span></span>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;">
-              <span style="color:var(--text2);">IP</span><span id="sonoff-ip-display">–</span>
+            <div style="display:flex;justify-content:space-between;font-size:13px;align-items:center;">
+              <span style="color:var(--text2);">IP</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="sonoff-ip-display">–</span>
+                <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="document.getElementById('configOverlay').style.display='flex'">⚙️ Cambiar</button>
+              </div>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:13px;">
               <span style="color:var(--text2);">Brillo actual</span><span id="sonoff-bri-display">70%</span>
@@ -926,13 +930,12 @@ const BACKEND_URL = (() => {
   return `http://127.0.0.1:${p||8888}`;  // Local
 })();
 let cfg = {
-  owmKey:          '',
+  owmKey:          'f1cbe38d826874ebd7f7e85bd0242060',
   sonoffIp:        '',
   spClientId:      SP_CLIENT_ID,
   spClientSecret:  '4f52890e442848249fc3524fd8ac271c',
   spToken:         '',
   spCodeVerifier:  '',
-  demoMode:        false
 };
 
 function saveConfig(){
@@ -946,12 +949,6 @@ function saveConfig(){
   if(spS)    cfg.spClientSecret = spS;
   document.getElementById('configOverlay').style.display = 'none';
   toast('✅','Configuración guardada');
-  init();
-}
-function skipConfig(){
-  cfg.demoMode = true;
-  document.getElementById('configOverlay').style.display = 'none';
-  toast('🎭','Modo demo activado');
   init();
 }
 
@@ -1164,7 +1161,6 @@ function applyScene(s){
 
 // Sonoff API
 async function sendSonoffPower(state){
-  if(!cfg.sonoffIp||cfg.demoMode) return;
   try {
     await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/switch`,{
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -1173,7 +1169,6 @@ async function sendSonoffPower(state){
   } catch(e){ console.warn('Sonoff no disponible:', e.message); }
 }
 async function sendSonoffBrightness(v){
-  if(!cfg.sonoffIp||cfg.demoMode) return;
   try {
     await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/dimmable`,{
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -1182,7 +1177,6 @@ async function sendSonoffBrightness(v){
   } catch(e){}
 }
 async function sendSonoffColor(hex){
-  if(!cfg.sonoffIp||cfg.demoMode) return;
   const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   try {
     await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/color`,{
@@ -1192,7 +1186,6 @@ async function sendSonoffColor(hex){
   } catch(e){}
 }
 async function sendSonoffColorTemp(mireds){
-  if(!cfg.sonoffIp||cfg.demoMode) return;
   try {
     await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/colortemp`,{
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -1212,8 +1205,6 @@ const wxIcons = {
 const daysES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 async function loadWeather(){
-  if(cfg.demoMode){ loadDemoWeather(); return; }
-  if(!cfg.owmKey){ loadDemoWeather(); return; }
   try {
     const pos = await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000}));
     const {latitude:lat,longitude:lon}=pos.coords;
@@ -1318,74 +1309,120 @@ function loadDemoWeather(){
 }
 
 // ════════════════════════════════════════
-//  SPOTIFY — Client Credentials + backend Python
-//  El backend /spotify-token hace el intercambio con Client Secret
-//  y devuelve el access_token. Sin redirect URI, sin OAuth del usuario.
-//  NOTA: Con Client Credentials solo se puede controlar reproducción
-//  en nombre del usuario si primero autoriza via /login en el backend.
+// ════════════════════════════════════════
+//  SPOTIFY — Web Playback SDK (reproduce dentro de la app)
 // ════════════════════════════════════════
 let spPlaying=false, spShuffle=false, spRepeat=false, spVolume=70;
-let activeDeviceId = null;  // dispositivo seleccionado para reproducir
 let spProgressInterval=null, spElapsed=0, spTotal=0;
+let spPlayer=null, spDeviceId=null;
 
-// ── Obtener token desde el backend local ──────────────────
-async function spotifyAuth(){
-  toast('🔄','Abriendo autorización Spotify...');
-  // Abre la página de login del backend en nueva pestaña
-  window.open(`${BACKEND_URL}/login`, '_blank');
-  // Polling: espera a que el backend confirme el token
-  let tries = 0;
-  const poll = setInterval(async () => {
-    tries++;
-    try {
-      const r = await fetch(`${BACKEND_URL}/token`);
-      if(r.ok){
-        const d = await r.json();
-        if(d.access_token){
-          clearInterval(poll);
-          cfg.spToken = d.access_token;
-          _onSpotifyReady();
-        }
-      }
-    } catch(e){}
-    if(tries > 60) clearInterval(poll); // timeout 60s
-  }, 1000);
+const SP_CLIENT_ID_KEY = '6f85d19e83bb47ac95beb6d94364eff3';
+const SP_SCOPES_LIST = [
+  'streaming','user-read-email','user-read-private',
+  'user-read-playback-state','user-modify-playback-state',
+  'user-read-currently-playing','playlist-read-private'
+].join(' ');
+
+// ── Login via Implicit Grant (sin backend, sin redirect externo) ──
+function spotifyLogin(){
+  const redirect = window.location.origin + window.location.pathname;
+  const url = 'https://accounts.spotify.com/authorize'
+    + '?client_id='    + SP_CLIENT_ID_KEY
+    + '&response_type=token'
+    + '&redirect_uri=' + encodeURIComponent(redirect)
+    + '&scope='        + encodeURIComponent(SP_SCOPES_LIST)
+    + '&show_dialog=false';
+  window.location.href = url;
 }
 
-async function checkSpotifyToken(){
-  // Intenta recuperar token del backend (si ya se autorizó antes)
-  try {
-    const r = await fetch(`${BACKEND_URL}/token`);
-    if(r.ok){
-      const d = await r.json();
-      if(d.access_token){
-        cfg.spToken = d.access_token;
-        _onSpotifyReady();
-        return;
-      }
+function spotifyAuth(){ spotifyLogin(); }
+
+// ── Detectar token al volver de Spotify ──────────────────────
+function checkSpotifyToken(){
+  const hash = window.location.hash;
+  if(hash && hash.includes('access_token')){
+    const p = new URLSearchParams(hash.substring(1));
+    const t = p.get('access_token');
+    const e = p.get('expires_in');
+    if(t){
+      cfg.spToken = t;
+      sessionStorage.setItem('sp_token',  t);
+      sessionStorage.setItem('sp_expiry', Date.now()+(parseInt(e||3600)-60)*1000);
+      window.history.replaceState(null, null, window.location.pathname);
+      _initSpotifySDK();
+      return;
     }
-  } catch(e){
-    // Backend no disponible aún — normal al inicio
+  }
+  const saved  = sessionStorage.getItem('sp_token');
+  const expiry = sessionStorage.getItem('sp_expiry');
+  if(saved && expiry && Date.now() < parseInt(expiry)){
+    cfg.spToken = saved;
+    _initSpotifySDK();
   }
 }
 
+// ── Inicializar Web Playback SDK ──────────────────────────────
+function _initSpotifySDK(){
+  if(!cfg.spToken) return;
+
+  const doInit = () => {
+    spPlayer = new Spotify.Player({
+      name: 'Mi Casa Inteligente',
+      getOAuthToken: cb => cb(cfg.spToken),
+      volume: spVolume / 100
+    });
+
+    spPlayer.addListener('ready', ({ device_id }) => {
+      spDeviceId = device_id;
+      activeDeviceId = device_id;
+      _onSpotifyReady();
+      spFetch('/me/player','PUT',{device_ids:[device_id], play:false}).catch(()=>{});
+    });
+
+    spPlayer.addListener('player_state_changed', state => {
+      if(!state) return;
+      const t = state.track_window.current_track;
+      if(!t) return;
+      const artistStr = t.artists.map(a=>a.name).join(', ');
+      ['sp-track-name','home-sp-track'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=t.name;});
+      const sa=document.getElementById('sp-track-artist');if(sa)sa.textContent=artistStr;
+      const sb=document.getElementById('home-sp-artist');if(sb)sb.textContent=artistStr;
+      const sc=document.getElementById('sp-track-album');if(sc)sc.textContent=t.album.name;
+      const ms=document.getElementById('home-music-status');if(ms)ms.textContent=t.name.length>12?t.name.slice(0,12)+'…':t.name;
+      const img=t.album.images?.[0]?.url;
+      if(img){
+        const a1=document.getElementById('sp-art-placeholder');if(a1)a1.innerHTML=`<img src="${img}" style="width:100%;height:100%;object-fit:cover;">`;
+        const a2=document.getElementById('home-sp-art');if(a2)a2.innerHTML=`<img src="${img}" style="width:100%;height:100%;object-fit:cover;">`;
+      }
+      spPlaying = !state.paused;
+      spElapsed = Math.round(state.position/1000);
+      spTotal   = Math.round(state.duration/1000);
+      updatePlayBtn();
+      updateProgress();
+      if(spPlaying) startProgressTimer(); else clearInterval(spProgressInterval);
+    });
+
+    spPlayer.addListener('initialization_error', ({message})=>toast('❌','SDK: '+message));
+    spPlayer.addListener('authentication_error',  ()=>{
+      toast('❌','Sesión expirada — vuelve a iniciar sesión');
+      sessionStorage.removeItem('sp_token');
+      const p=document.getElementById('sp-auth-pending');if(p)p.style.display='block';
+      const r=document.getElementById('sp-auth-ready');if(r)r.style.display='none';
+    });
+    spPlayer.addListener('account_error', ()=>toast('⚠️','Necesitas Spotify Premium para el reproductor integrado'));
+
+    spPlayer.connect();
+  };
+
+  if(window.Spotify && window.Spotify.Player) doInit();
+  else window.onSpotifyWebPlaybackSDKReady = doInit;
+}
+
 function _onSpotifyReady(){
-  document.getElementById('sp-token-status').textContent = 'Token activo ✓';
-  document.getElementById('sp-token-status').style.color  = 'var(--green)';
-  toast('🎵','Spotify conectado — buscando dispositivos...');
+  const p=document.getElementById('sp-auth-pending');if(p)p.style.display='none';
+  const r=document.getElementById('sp-auth-ready');if(r)r.style.display='block';
+  toast('🎵','Spotify listo — reproduciendo en Mi Casa');
   spGetCurrentTrack();
-  // Auto-buscar y seleccionar dispositivo al conectar
-  setTimeout(async ()=>{
-    const d = await spFetch('/me/player/devices');
-    if(d && d.devices && d.devices.length){
-      const dev = d.devices.find(x=>x.is_active) || d.devices[0];
-      activeDeviceId = dev.id;
-      toast('🔊','Dispositivo listo: ' + dev.name);
-      spGetDevices();
-    } else {
-      toast('⚠️','Abre Spotify en tu teléfono para activar un dispositivo');
-    }
-  }, 1000);
 }
 
 async function spFetch(path, method='GET', body=null){
@@ -1401,7 +1438,6 @@ async function spFetch(path, method='GET', body=null){
 }
 
 async function spGetCurrentTrack(){
-  if(cfg.demoMode){ loadDemoTrack(); return; }
   const d=await spFetch('/me/player/currently-playing');
   if(d && d.item){
     renderTrack(d);
@@ -1467,23 +1503,19 @@ function seekTrack(e){
 }
 
 async function spToggle(){
-  if(cfg.demoMode){ spPlaying=!spPlaying; updatePlayBtn(); startProgressTimer(); toast(spPlaying?'▶':'⏸', spPlaying?'Reproduciendo':'Pausado'); return; }
   if(!cfg.spToken){ toast('⚠️','Conecta Spotify primero'); return; }
-  const ep=spPlaying?'/me/player/pause':'/me/player/play'+(activeDeviceId?'?device_id='+activeDeviceId:'');
-  await spFetch(ep,'PUT');
+  if(spPlayer){ if(spPlaying) await spPlayer.pause(); else await spPlayer.resume(); } else { const ep=spPlaying?'/me/player/pause':'/me/player/play'+(activeDeviceId?'?device_id='+activeDeviceId:''); await spFetch(ep,'PUT'); }
   spPlaying=!spPlaying; updatePlayBtn(); startProgressTimer();
   toast(spPlaying?'▶':'⏸', spPlaying?'Reproduciendo':'Pausado');
 }
 
 async function spNext(){
-  if(!cfg.spToken&&!cfg.demoMode){ toast('⚠️','Conecta Spotify'); return; }
-  if(!cfg.demoMode) await spFetch('/me/player/next','POST');
+  if(spPlayer) await spPlayer.nextTrack(); else await spFetch('/me/player/next','POST');
   setTimeout(spGetCurrentTrack,500);
   toast('⏭','Siguiente canción');
 }
 async function spPrev(){
-  if(!cfg.spToken&&!cfg.demoMode){ toast('⚠️','Conecta Spotify'); return; }
-  if(!cfg.demoMode) await spFetch('/me/player/previous','POST');
+  if(spPlayer) await spPlayer.previousTrack(); else await spFetch('/me/player/previous','POST');
   setTimeout(spGetCurrentTrack,500);
   toast('⏮','Canción anterior');
 }
@@ -1516,11 +1548,10 @@ async function updateVolume(v){
   document.getElementById('sp-vol-val').textContent=v+'%';
   document.getElementById('sp-vol-slider').style.setProperty('--pct',v+'%');
   document.getElementById('vol-icon').textContent=v>50?'🔊':v>10?'🔉':'🔈';
-  if(!cfg.demoMode && cfg.spToken) await spFetch(`/me/player/volume?volume_percent=${v}`,'PUT');
+  if(spPlayer) spPlayer.setVolume(v/100); else if(cfg.spToken) await spFetch(`/me/player/volume?volume_percent=${v}`,'PUT');
 }
 
 async function spGetQueue(){
-  if(cfg.demoMode){ renderDemoQueue(); return; }
   if(!cfg.spToken) return;
 
   // Obtener canción actual y cola en paralelo
@@ -1592,7 +1623,6 @@ async function spGetQueue(){
 // Iniciar: sudo systemctl start raspotify
 
 async function spGetDevices(){
-  if(cfg.demoMode){ document.getElementById('sp-devices-list').innerHTML='<div style="color:var(--text2);font-size:13px;">📱 Dispositivo Demo · Activo</div>'; return; }
   if(!cfg.spToken) return;
   const d=await spFetch('/me/player/devices');
   const list=document.getElementById('sp-devices-list');
@@ -1658,7 +1688,6 @@ async function spPlayUri(uri){
 async function spSearch(){
   const q=document.getElementById('sp-search-input').value.trim();
   if(!q) return;
-  if(cfg.demoMode){ renderDemoSearch(q); return; }
   if(!cfg.spToken){ toast('⚠️','Conecta Spotify primero'); return; }
   const d=await spFetch(`/search?q=${encodeURIComponent(q)}&type=track&limit=5`);
   const res=document.getElementById('sp-search-results');
@@ -1723,7 +1752,6 @@ function init(){
   drawColorWheel();
   buildSwatches();
   loadWeather();
-  if(cfg.demoMode){ loadDemoTrack(); renderDemoQueue(); }
   checkSpotifyToken();
 }
 
@@ -1734,13 +1762,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   updateClock();
   setInterval(updateClock, 1000);
   // Spotify: detecta code en URL o token en sessionStorage
-  await checkSpotifyToken();
+  checkSpotifyToken();
   // Carga clima con geolocalización
   loadWeather();
   // Aviso de configuración pendiente
   setTimeout(() => {
-    if(!cfg.spToken && !cfg.demoMode){
-      toast('🎵','Toca "Conectar con Spotify" en la pestaña Música');
+    if(!cfg.spToken){
+      toast('🎵','Ve a Música → Iniciar sesión con Spotify');
     }
     const falta = [];
     if(!cfg.owmKey)   falta.push('🌤 OWM Key');
@@ -1788,3 +1816,4 @@ window.addEventListener('appinstalled', () => {
 </script>
 </body>
 </html>
+"Actualizar Spotify SDK + OWM key"
