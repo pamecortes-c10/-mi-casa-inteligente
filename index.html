@@ -1323,41 +1323,144 @@ const SP_SCOPES_LIST = [
   'user-read-currently-playing','playlist-read-private'
 ].join(' ');
 
-// ── Login via Implicit Grant (sin backend, sin redirect externo) ──
-function spotifyLogin(){
+// ── Login via Authorization Code + PKCE (sin backend) ──────────
+// Spotify deprecated Implicit Grant en 2024 — PKCE es el estándar actual
+
+function _b64url(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+async function _pkceVerifier(){
+  const arr = new Uint8Array(64);
+  crypto.getRandomValues(arr);
+  return _b64url(arr);
+}
+async function _pkceChallenge(verifier){
+  const enc    = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', enc);
+  return _b64url(digest);
+}
+
+async function spotifyLogin(){
+  const verifier  = await _pkceVerifier();
+  const challenge = await _pkceChallenge(verifier);
+  sessionStorage.setItem('sp_verifier', verifier);
+
   const redirect = window.location.origin + window.location.pathname;
+  sessionStorage.setItem('sp_redirect', redirect);
+
   const url = 'https://accounts.spotify.com/authorize'
-    + '?client_id='    + SP_CLIENT_ID_KEY
-    + '&response_type=token'
-    + '&redirect_uri=' + encodeURIComponent(redirect)
-    + '&scope='        + encodeURIComponent(SP_SCOPES_LIST)
+    + '?client_id='             + SP_CLIENT_ID_KEY
+    + '&response_type=code'
+    + '&redirect_uri='          + encodeURIComponent(redirect)
+    + '&scope='                 + encodeURIComponent(SP_SCOPES_LIST)
+    + '&code_challenge_method=S256'
+    + '&code_challenge='        + challenge
     + '&show_dialog=false';
   window.location.href = url;
 }
 
+async function _exchangeCode(code){
+  const verifier  = sessionStorage.getItem('sp_verifier');
+  const redirect  = sessionStorage.getItem('sp_redirect');
+  if(!verifier){ toast('⚠️','Sesión expirada, intenta de nuevo'); return; }
+
+  const body = new URLSearchParams({
+    grant_type:    'authorization_code',
+    code,
+    redirect_uri:  redirect,
+    client_id:     SP_CLIENT_ID_KEY,
+    code_verifier: verifier,
+  });
+
+  try {
+    const r = await fetch('https://accounts.spotify.com/api/token',{
+      method:  'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body:    body.toString()
+    });
+    const d = await r.json();
+    if(d.access_token){
+      cfg.spToken = d.access_token;
+      sessionStorage.setItem('sp_token',   d.access_token);
+      sessionStorage.setItem('sp_expiry',  Date.now()+(d.expires_in-60)*1000);
+      if(d.refresh_token)
+        sessionStorage.setItem('sp_refresh', d.refresh_token);
+      sessionStorage.removeItem('sp_verifier');
+      _initSpotifySDK();
+    } else {
+      console.error('Token error:', d);
+      toast('❌','Error Spotify: '+(d.error_description||d.error||'desconocido'));
+    }
+  } catch(e){
+    toast('❌','Error de red al conectar Spotify');
+  }
+}
+
+async function _refreshSpToken(){
+  const refresh = sessionStorage.getItem('sp_refresh');
+  if(!refresh) return false;
+  const body = new URLSearchParams({
+    grant_type:    'refresh_token',
+    refresh_token:  refresh,
+    client_id:      SP_CLIENT_ID_KEY,
+  });
+  try {
+    const r = await fetch('https://accounts.spotify.com/api/token',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: body.toString()
+    });
+    const d = await r.json();
+    if(d.access_token){
+      cfg.spToken = d.access_token;
+      sessionStorage.setItem('sp_token',  d.access_token);
+      sessionStorage.setItem('sp_expiry', Date.now()+(d.expires_in-60)*1000);
+      if(d.refresh_token) sessionStorage.setItem('sp_refresh', d.refresh_token);
+      return true;
+    }
+  } catch(e){ console.error('Refresh error:',e); }
+  return false;
+}
+
 function spotifyAuth(){ spotifyLogin(); }
 
-// ── Detectar token al volver de Spotify ──────────────────────
-function checkSpotifyToken(){
-  const hash = window.location.hash;
-  if(hash && hash.includes('access_token')){
-    const p = new URLSearchParams(hash.substring(1));
-    const t = p.get('access_token');
-    const e = p.get('expires_in');
-    if(t){
-      cfg.spToken = t;
-      sessionStorage.setItem('sp_token',  t);
-      sessionStorage.setItem('sp_expiry', Date.now()+(parseInt(e||3600)-60)*1000);
-      window.history.replaceState(null, null, window.location.pathname);
-      _initSpotifySDK();
-      return;
-    }
+// ── Detectar code/token al volver de Spotify ────────────────
+async function checkSpotifyToken(){
+  // 1. ¿Viene un ?code= en la URL? (PKCE callback)
+  const params = new URLSearchParams(window.location.search);
+  const code   = params.get('code');
+  const error  = params.get('error');
+
+  if(error){
+    toast('❌','Spotify: '+error);
+    window.history.replaceState(null, null, window.location.pathname);
+    return;
   }
-  const saved  = sessionStorage.getItem('sp_token');
-  const expiry = sessionStorage.getItem('sp_expiry');
+
+  if(code){
+    // Limpiar URL antes de intercambiar
+    window.history.replaceState(null, null, window.location.pathname);
+    toast('🔄','Conectando con Spotify...');
+    await _exchangeCode(code);
+    return;
+  }
+
+  // 2. ¿Hay token válido guardado?
+  const saved   = sessionStorage.getItem('sp_token');
+  const expiry  = sessionStorage.getItem('sp_expiry');
+  const refresh = sessionStorage.getItem('sp_refresh');
+
   if(saved && expiry && Date.now() < parseInt(expiry)){
     cfg.spToken = saved;
     _initSpotifySDK();
+    return;
+  }
+
+  // 3. Intentar renovar con refresh_token
+  if(refresh){
+    const ok = await _refreshSpToken();
+    if(ok){ _initSpotifySDK(); return; }
   }
 }
 
