@@ -527,6 +527,7 @@
     <button class="nav-btn" onclick="navigate('lights',this)"><span class="nav-icon">💡</span>Iluminación</button>
     <button class="nav-btn" onclick="navigate('weather',this)"><span class="nav-icon">🌤</span>Clima</button>
     <button class="nav-btn" onclick="navigate('spotify',this)"><span class="nav-icon">🎵</span>Música</button>
+    <button class="nav-btn" onclick="navigate('perfil',this)"><span class="nav-icon">👤</span>Perfil</button>
 
   </div>
 
@@ -910,6 +911,107 @@
   </div>
 </div>
 
+  <!-- ═══════════════════════════════════ PERFIL ═══════════════════════════════════ -->
+  <div class="section" id="sec-perfil">
+    <div class="grid-2" style="align-items:start;gap:20px;">
+
+      <!-- Tarjeta principal de perfil -->
+      <div class="card" style="text-align:center;padding:36px 24px;">
+        <!-- Avatar -->
+        <div id="perfil-avatar" style="width:96px;height:96px;border-radius:50%;
+          background:linear-gradient(135deg,var(--accent),var(--accent2));
+          display:flex;align-items:center;justify-content:center;
+          font-family:var(--font-display);font-size:38px;font-weight:800;
+          color:#fff;margin:0 auto 20px;box-shadow:0 0 30px rgba(79,124,255,0.4);">
+          ?
+        </div>
+        <div id="perfil-nombre-display" style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--text);margin-bottom:4px;">
+          Tu nombre
+        </div>
+        <div id="perfil-fecha-display" style="font-size:13px;color:var(--text2);margin-bottom:16px;">
+          — Sin fecha de nacimiento —
+        </div>
+        <div id="perfil-cumple-badge" style="display:none;">
+          <div style="background:linear-gradient(135deg,#f5c842,#fb923c);
+            border-radius:12px;padding:12px 20px;margin-bottom:16px;
+            font-size:14px;font-weight:600;color:#000;">
+            🎂 ¡Hoy es tu cumpleaños! 🎉
+          </div>
+        </div>
+        <div id="perfil-edad-display" style="font-size:13px;color:var(--text3);"></div>
+      </div>
+
+      <!-- Formulario de edición -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-label">Información Personal</div>
+
+          <div style="margin-top:16px;display:grid;gap:14px;">
+            <!-- Nombre -->
+            <div>
+              <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Nombre</label>
+              <input type="text" id="perfil-nombre" placeholder="Tu nombre"
+                style="width:100%;padding:10px 14px;border-radius:10px;
+                background:var(--bg3);border:1px solid var(--border2);
+                color:var(--text);font-family:var(--font-main);font-size:14px;
+                outline:none;transition:border 0.2s;"
+                onfocus="this.style.borderColor='var(--accent)'"
+                onblur="this.style.borderColor='var(--border2)'"
+                oninput="previewPerfil()">
+            </div>
+            <!-- Apellido -->
+            <div>
+              <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Apellido</label>
+              <input type="text" id="perfil-apellido" placeholder="Tu apellido"
+                style="width:100%;padding:10px 14px;border-radius:10px;
+                background:var(--bg3);border:1px solid var(--border2);
+                color:var(--text);font-family:var(--font-main);font-size:14px;
+                outline:none;transition:border 0.2s;"
+                onfocus="this.style.borderColor='var(--accent)'"
+                onblur="this.style.borderColor='var(--border2)'"
+                oninput="previewPerfil()">
+            </div>
+            <!-- Fecha de nacimiento -->
+            <div>
+              <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Fecha de nacimiento</label>
+              <input type="date" id="perfil-nacimiento"
+                style="width:100%;padding:10px 14px;border-radius:10px;
+                background:var(--bg3);border:1px solid var(--border2);
+                color:var(--text);font-family:var(--font-main);font-size:14px;
+                outline:none;transition:border 0.2s;color-scheme:dark;"
+                onfocus="this.style.borderColor='var(--accent)'"
+                onblur="this.style.borderColor='var(--border2)'"
+                onchange="previewPerfil()">
+            </div>
+
+            <button class="btn btn-primary" onclick="guardarPerfil()" style="margin-top:4px;">
+              Guardar perfil
+            </button>
+          </div>
+        </div>
+
+        <!-- Vista previa del saludo -->
+        <div class="card" style="background:linear-gradient(135deg,var(--card),var(--card2));border-color:var(--border2);">
+          <div class="card-label">Vista previa del saludo</div>
+          <div style="margin-top:12px;background:var(--bg3);border-radius:10px;padding:16px;">
+            <div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:6px;">PANEL DE CONTROL</div>
+            <div id="perfil-preview-greeting" style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);">
+              Buenos días, <span style="color:var(--accent)">Tu nombre</span> 👋
+            </div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;">Empieza el día con energía. Tu hogar inteligente está listo.</div>
+          </div>
+        </div>
+
+        <!-- Próximo cumpleaños -->
+        <div class="card" id="perfil-proximo-card" style="display:none;">
+          <div class="card-label">🎂 Próximo Cumpleaños</div>
+          <div id="perfil-proximo-texto" style="font-size:14px;color:var(--text);margin-top:10px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 <script>
 // ════════════════════════════════════════
 //  CONFIG
@@ -975,6 +1077,7 @@ function navigate(id, btn){
   if(btn) btn.classList.add('active');
   if(id==='weather') loadWeather();
   if(id==='spotify') spGetCurrentTrack();
+  if(id==='perfil')  cargarPerfil();
 }
 
 // ════════════════════════════════════════
@@ -995,7 +1098,14 @@ function updateClock(){
   else if(h>=12 && h<19){ greeting='Buenas tardes'; icon='🌅'; sub='La tarde está avanzando. Revisa el estado de tu hogar.'; }
   else { greeting='Buenas noches'; icon='🌙'; sub='Es momento de descansar. Ajusta la iluminación y la música.'; }
 
-  document.getElementById('greeting-text').innerHTML = `${greeting}, <span class="name">Bienvenido</span> 👋`;
+  const userName = getNombre();
+  const isBday   = esCumpleanios();
+  const greetMsg = isBday
+    ? `🎂 ¡Feliz cumpleaños, <span class="name">${userName}</span>! 🎉`
+    : `${greeting}, <span class="name">${userName}</span> 👋`;
+  document.getElementById('greeting-text').innerHTML = greetMsg;
+  if(isBday) document.getElementById('greeting-sub').textContent =
+    '🎉 ¡Hoy es tu cumpleaños! Que tengas un día increíble.';
   document.getElementById('greeting-sub').textContent = sub;
   document.getElementById('greeting-icon').textContent = icon;
 }
@@ -1858,8 +1968,127 @@ function init(){
   checkSpotifyToken();
 }
 
+
+// ════════════════════════════════════════
+//  PERFIL DE USUARIO
+// ════════════════════════════════════════
+
+// Cargar perfil guardado en localStorage
+function cargarPerfil(){
+  const nombre    = localStorage.getItem('perfil_nombre')    || '';
+  const apellido  = localStorage.getItem('perfil_apellido')  || '';
+  const nacimiento = localStorage.getItem('perfil_nacimiento') || '';
+
+  if(nombre)     document.getElementById('perfil-nombre').value     = nombre;
+  if(apellido)   document.getElementById('perfil-apellido').value   = apellido;
+  if(nacimiento) document.getElementById('perfil-nacimiento').value = nacimiento;
+
+  actualizarPerfil(nombre, apellido, nacimiento);
+}
+
+function previewPerfil(){
+  const nombre    = document.getElementById('perfil-nombre').value.trim();
+  const apellido  = document.getElementById('perfil-apellido').value.trim();
+  const nacimiento = document.getElementById('perfil-nacimiento').value;
+  actualizarPerfil(nombre, apellido, nacimiento);
+}
+
+function guardarPerfil(){
+  const nombre    = document.getElementById('perfil-nombre').value.trim();
+  const apellido  = document.getElementById('perfil-apellido').value.trim();
+  const nacimiento = document.getElementById('perfil-nacimiento').value;
+
+  if(!nombre){ toast('⚠️','Ingresa al menos tu nombre'); return; }
+
+  localStorage.setItem('perfil_nombre',     nombre);
+  localStorage.setItem('perfil_apellido',   apellido);
+  localStorage.setItem('perfil_nacimiento', nacimiento);
+
+  actualizarPerfil(nombre, apellido, nacimiento);
+  toast('✅', '¡Perfil guardado, ' + nombre + '!');
+  updateClock(); // Actualizar saludo inmediatamente
+}
+
+function actualizarPerfil(nombre, apellido, nacimiento){
+  const nombreCompleto = [nombre, apellido].filter(Boolean).join(' ') || 'Tu nombre';
+  const inicial = nombre ? nombre[0].toUpperCase() : '?';
+
+  // Avatar con inicial
+  const av = document.getElementById('perfil-avatar');
+  if(av) av.textContent = inicial;
+
+  // Nombre en tarjeta
+  const nd = document.getElementById('perfil-nombre-display');
+  if(nd) nd.textContent = nombreCompleto;
+
+  // Preview del saludo
+  const pg = document.getElementById('perfil-preview-greeting');
+  if(pg) pg.innerHTML = `Buenos días, <span style="color:var(--accent)">${nombre||'Tu nombre'}</span> 👋`;
+
+  // Fecha y edad
+  const fd = document.getElementById('perfil-fecha-display');
+  const ed = document.getElementById('perfil-edad-display');
+  const cb = document.getElementById('perfil-cumple-badge');
+  const pc = document.getElementById('perfil-proximo-card');
+  const pt = document.getElementById('perfil-proximo-texto');
+
+  if(nacimiento){
+    const hoy    = new Date();
+    const nac    = new Date(nacimiento);
+    const meses  = ['enero','febrero','marzo','abril','mayo','junio',
+                    'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const dia    = nac.getUTCDate();
+    const mes    = meses[nac.getUTCMonth()];
+    const anio   = nac.getUTCFullYear();
+
+    if(fd) fd.textContent = `${dia} de ${mes} de ${anio}`;
+
+    // Edad
+    let edad = hoy.getFullYear() - nac.getUTCFullYear();
+    const mDif = hoy.getMonth() - nac.getUTCMonth();
+    if(mDif < 0 || (mDif===0 && hoy.getDate() < dia)) edad--;
+    if(ed) ed.textContent = `${edad} años`;
+
+    // ¿Es hoy el cumpleaños?
+    const esCumple = hoy.getDate()===dia && hoy.getMonth()===nac.getUTCMonth();
+    if(cb) cb.style.display = esCumple ? 'block' : 'none';
+
+    // Próximo cumpleaños
+    if(pc) pc.style.display = 'block';
+    if(pt){
+      if(esCumple){
+        pt.innerHTML = `<span style="color:var(--gold);font-weight:600;">🎉 ¡Hoy es tu cumpleaños!</span><br><span style="font-size:12px;color:var(--text2);">¡Feliz cumpleaños ${nombre}! Que tengas un excelente día.</span>`;
+      } else {
+        const proxCumple = new Date(hoy.getFullYear(), nac.getUTCMonth(), dia);
+        if(proxCumple < hoy) proxCumple.setFullYear(hoy.getFullYear()+1);
+        const diasRestantes = Math.ceil((proxCumple - hoy)/(1000*60*60*24));
+        pt.innerHTML = `<span style="font-size:24px;font-weight:700;color:var(--accent);">${diasRestantes}</span> <span style="color:var(--text2);font-size:13px;">días para tu próximo cumpleaños</span><br><span style="font-size:12px;color:var(--text3);margin-top:4px;display:block;">${dia} de ${mes}</span>`;
+      }
+    }
+  } else {
+    if(fd) fd.textContent = '— Sin fecha de nacimiento —';
+    if(ed) ed.textContent = '';
+    if(cb) cb.style.display = 'none';
+    if(pc) pc.style.display = 'none';
+  }
+}
+
+// Verificar cumpleaños para el saludo del dashboard
+function esCumpleanios(){
+  const nacimiento = localStorage.getItem('perfil_nacimiento');
+  if(!nacimiento) return false;
+  const hoy = new Date();
+  const nac = new Date(nacimiento);
+  return hoy.getDate()===nac.getUTCDate() && hoy.getMonth()===nac.getUTCMonth();
+}
+
+function getNombre(){
+  return localStorage.getItem('perfil_nombre') || 'Bienvenido';
+}
+
 // ── ARRANQUE DIRECTO ─────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  cargarPerfil();
   drawColorWheel();
   buildSwatches();
   updateClock();
