@@ -2,11 +2,19 @@
 """
 server.py — Mi Casa Inteligente
 Backend completo para Render.com
-Sirve: PWA estática + Spotify OAuth2 PKCE + proxy OWM
+Sirve: PWA estática + Spotify OAuth2 PKCE + proxy OWM + control de foco Tuya
 """
 import http.server, urllib.parse, urllib.request
 import json, os, secrets, hashlib, base64
 import threading, time, sys
+
+try:
+    import tinytuya
+    TUYA_AVAILABLE = True
+except ImportError:
+    TUYA_AVAILABLE = False
+    print('  ⚠️  tinytuya no instalado — el control de foco Tuya estará deshabilitado')
+    print('      Agrega "tinytuya" a requirements.txt para habilitarlo')
 
 # ── Config ────────────────────────────────────────────────────
 SP_CLIENT_ID     = os.environ.get('SP_CLIENT_ID',     '6f85d19e83bb47ac95beb6d94364eff3')
@@ -146,6 +154,71 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.cors()
         self.end_headers()
         self.wfile.write(body)
+
+    # ── POST /tuya/command → controla el foco Tuya en la red local ──
+    # NOTA: este endpoint solo funciona si el backend corre en la
+    # MISMA red local que el foco (ej. tu computadora en casa).
+    # Si el backend está en Render.com (nube), no puede alcanzar
+    # un dispositivo en tu red doméstica — para eso se necesitaría
+    # la Tuya Cloud API en vez de conexión LAN directa.
+    def do_POST(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path   = parsed.path
+
+        if path == '/tuya/command':
+            if not TUYA_AVAILABLE:
+                self.send_json({'error': 'tinytuya no está instalado en el servidor'}, 500)
+                return
+
+            length = int(self.headers.get('Content-Length', 0))
+            try:
+                body = json.loads(self.rfile.read(length))
+            except Exception:
+                self.send_json({'error': 'JSON inválido'}, 400)
+                return
+
+            device_id  = body.get('device_id')
+            local_key  = body.get('local_key')
+            device_ip  = body.get('device_ip')  # opcional, si no se pasa se autodetecta en LAN
+            commands   = body.get('commands', [])
+
+            if not device_id or not local_key:
+                self.send_json({'error': 'Faltan device_id o local_key'}, 400)
+                return
+
+            try:
+                d = tinytuya.OutletDevice(device_id, device_ip or 'Auto', local_key)
+                d.set_version(3.3)
+                if not device_ip:
+                    # Autodetectar IP en la red local mediante escaneo
+                    d.set_socketPersistent(False)
+
+                results = []
+                for cmd in commands:
+                    code  = cmd.get('code')
+                    value = cmd.get('value')
+                    # Mapear códigos DPS comunes de focos Tuya
+                    dps_map = {
+                        'switch_led':       1,
+                        'work_mode':        2,
+                        'bright_value_v2':  3,
+                        'temp_value_v2':    4,
+                        'colour_data_v2':   5,
+                    }
+                    dps_id = dps_map.get(code)
+                    if dps_id:
+                        r = d.set_value(dps_id, value)
+                        results.append({'code': code, 'result': str(r)})
+
+                self.send_json({'ok': True, 'results': results})
+            except Exception as e:
+                print(f'  ❌ Tuya error: {e}')
+                self.send_json({'error': str(e)}, 500)
+            return
+
+        self.send_response(404)
+        self.end_headers()
+        self.wfile.write(b'Not found')
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)

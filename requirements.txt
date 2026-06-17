@@ -1,3 +1,2 @@
 # Mi Casa Inteligente — dependencias
-# Solo librería estándar de Python, sin dependencias externas
-# (http.server, json, ssl, etc. ya vienen con Python 3)
+tinytuya>=1.18.0
