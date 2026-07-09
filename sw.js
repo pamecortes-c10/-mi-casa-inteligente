@@ -1,5 +1,5 @@
 // sw.js — Service Worker para Mi Casa Inteligente PWA
-const CACHE   = 'mi-casa-v1';
+const CACHE   = 'mi-casa-v2';
 const OFFLINE = ['/'];
 
 // Al instalar: cachear la app

@@ -7,40 +7,41 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mi Casa">
-<meta name="theme-color" content="#080c14">
+<meta name="theme-color" content="#f7f4ee">
 <meta name="description" content="Control inteligente del hogar — Luces, Clima y Música">
 <title>Mi Casa Inteligente</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=2">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2">
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #080c14;
-    --bg2: #0d1220;
-    --bg3: #111827;
-    --card: #141d2e;
-    --card2: #1a2540;
-    --border: rgba(255,255,255,0.06);
-    --border2: rgba(255,255,255,0.12);
-    --text: #e8edf7;
-    --text2: #8b96b0;
-    --text3: #4a5568;
-    --accent: #4f7cff;
-    --accent2: #7c5cfc;
-    --gold: #f5c842;
-    --teal: #00e5b0;
-    --coral: #ff6b6b;
-    --pink: #fc5cad;
-    --green: #4ade80;
-    --orange: #fb923c;
+    --bg: #f7f4ee;
+    --bg2: #f1ece1;
+    --bg3: #e6ded0;
+    --card: #ffffff;
+    --card2: #f5f1e8;
+    --border: rgba(38,51,61,0.08);
+    --border2: rgba(38,51,61,0.14);
+    --text: #2b3a45;
+    --text2: #6c7f8a;
+    --text3: #9fb0b8;
+    --accent: #4f8fa8;
+    --accent2: #35708f;
+    --gold: #d9a968;
+    --teal: #3fae9e;
+    --coral: #f08a72;
+    --pink: #e79bb8;
+    --green: #6ebd8a;
+    --orange: #e8a25f;
     --font-main: 'Space Grotesk', sans-serif;
     --font-display: 'Syne', sans-serif;
     --r: 16px;
@@ -53,9 +54,9 @@
   body::before {
     content:'';
     position:fixed; inset:0; pointer-events:none; z-index:0;
-    background: radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,124,255,0.08) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(124,92,252,0.06) 0%, transparent 60%),
-                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(0,229,176,0.03) 0%, transparent 70%);
+    background: radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,143,168,0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(63,174,158,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(217,169,104,0.06) 0%, transparent 70%);
   }
 
   /* ─── LAYOUT ─── */
@@ -102,7 +103,7 @@
   .nav-btn:hover { color:var(--text); background:var(--card2); }
   .nav-btn.active {
     background:linear-gradient(135deg,var(--accent),var(--accent2));
-    color:#fff; box-shadow:0 4px 20px rgba(79,124,255,0.3);
+    color:#fff; box-shadow:0 4px 20px rgba(79,143,168,0.3);
   }
   .nav-btn .nav-icon { font-size:16px; }
 
@@ -143,7 +144,7 @@
   .card-glow::after {
     content:''; position:absolute; top:-40px; right:-40px;
     width:120px; height:120px; border-radius:50%;
-    background:radial-gradient(circle, var(--glow-color,rgba(79,124,255,0.15)) 0%, transparent 70%);
+    background:radial-gradient(circle, var(--glow-color,rgba(79,143,168,0.15)) 0%, transparent 70%);
     pointer-events:none;
   }
 
@@ -155,7 +156,7 @@
   }
   .greeting-section::before {
     content:''; position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none;
-    background:linear-gradient(135deg,rgba(79,124,255,0.05) 0%,rgba(124,92,252,0.05) 100%);
+    background:linear-gradient(135deg,rgba(79,143,168,0.05) 0%,rgba(53,112,143,0.05) 100%);
   }
   .greeting-eyebrow { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--text3); margin-bottom:12px; }
   .greeting-main { font-family:var(--font-display); font-size:40px; font-weight:800; line-height:1.1; margin-bottom:10px; }
@@ -179,7 +180,7 @@
     border:1px solid var(--border2); cursor:pointer; position:relative; transition:all 0.3s;
     flex-shrink:0;
   }
-  .toggle.on { background:linear-gradient(135deg,var(--accent),var(--accent2)); border-color:transparent; box-shadow:0 0 12px rgba(79,124,255,0.4); }
+  .toggle.on { background:linear-gradient(135deg,var(--accent),var(--accent2)); border-color:transparent; box-shadow:0 0 12px rgba(79,143,168,0.4); }
   .toggle::after {
     content:''; position:absolute; top:3px; left:3px;
     width:18px; height:18px; border-radius:50%; background:#fff;
@@ -198,7 +199,7 @@
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
-    background:#fff; box-shadow:0 2px 8px rgba(79,124,255,0.5), 0 0 0 3px rgba(79,124,255,0.2);
+    background:#fff; box-shadow:0 2px 8px rgba(79,143,168,0.5), 0 0 0 3px rgba(79,143,168,0.2);
     cursor:pointer; transition:transform 0.1s;
   }
   input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.15); }
@@ -215,9 +216,9 @@
   .btn-primary {
     background:linear-gradient(135deg,var(--accent),var(--accent2));
     border-color:transparent; color:#fff;
-    box-shadow:0 4px 16px rgba(79,124,255,0.3);
+    box-shadow:0 4px 16px rgba(79,143,168,0.3);
   }
-  .btn-primary:hover { box-shadow:0 6px 24px rgba(79,124,255,0.4); }
+  .btn-primary:hover { box-shadow:0 6px 24px rgba(79,143,168,0.4); }
   .btn-icon {
     width:42px; height:42px; padding:0; border-radius:12px;
   }
@@ -257,14 +258,14 @@
 
   /* ─── WEATHER ─── */
   .weather-hero {
-    background:linear-gradient(135deg,#0f2040,#1a3060);
-    border:1px solid rgba(79,124,255,0.2);
+    background:linear-gradient(135deg,#e4f0f5,#cfe6ee);
+    border:1px solid rgba(79,143,168,0.2);
     border-radius:var(--r2); padding:32px; position:relative; overflow:hidden;
   }
   .weather-hero::before {
     content:''; position:absolute; top:-30%; right:-10%;
     width:300px; height:300px; border-radius:50%;
-    background:radial-gradient(circle,rgba(79,124,255,0.1) 0%,transparent 70%);
+    background:radial-gradient(circle,rgba(79,143,168,0.1) 0%,transparent 70%);
     pointer-events:none;
   }
   .weather-temp { font-family:var(--font-display); font-size:72px; font-weight:800; line-height:1; }
@@ -289,13 +290,13 @@
 
   /* ─── SPOTIFY ─── */
   .spotify-player {
-    background:linear-gradient(135deg,#0d1a12,#122210);
-    border:1px solid rgba(74,222,128,0.15);
+    background:linear-gradient(135deg,#eaf3ec,#dcecdf);
+    border:1px solid rgba(110,189,138,0.15);
     border-radius:var(--r2); padding:32px; position:relative; overflow:hidden;
   }
   .spotify-player::before {
     content:''; position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(ellipse 60% 60% at 80% 20%, rgba(74,222,128,0.05) 0%, transparent 70%);
+    background:radial-gradient(ellipse 60% 60% at 80% 20%, rgba(110,189,138,0.05) 0%, transparent 70%);
   }
   .album-art {
     width:120px; height:120px; border-radius:16px; overflow:hidden;
@@ -305,7 +306,7 @@
   .album-art img { width:100%; height:100%; object-fit:cover; }
   .album-art-placeholder {
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg,#1a2e1a,#0f1e0f); font-size:40px;
+    background:linear-gradient(135deg,#dceee2,#eef6ec); font-size:40px;
   }
   .track-info { flex:1; min-width:0; }
   .track-name { font-family:var(--font-display); font-size:22px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -319,7 +320,7 @@
   .progress-thumb {
     position:absolute; top:50%; transform:translate(-50%,-50%);
     width:12px; height:12px; border-radius:50%; background:#fff;
-    box-shadow:0 0 8px rgba(74,222,128,0.5); cursor:grab;
+    box-shadow:0 0 8px rgba(110,189,138,0.5); cursor:grab;
     opacity:0; transition:opacity 0.2s;
   }
   .progress-wrap:hover .progress-thumb { opacity:1; }
@@ -328,10 +329,10 @@
   .sp-btn { background:none; border:none; color:var(--text2); cursor:pointer; font-size:20px; transition:all 0.2s; display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; }
   .sp-btn:hover { color:var(--text); background:rgba(255,255,255,0.05); }
   .sp-btn.play {
-    width:52px; height:52px; background:var(--green); color:#0d1a12;
-    font-size:22px; box-shadow:0 4px 20px rgba(74,222,128,0.3);
+    width:52px; height:52px; background:var(--green); color:#fff;
+    font-size:22px; box-shadow:0 4px 20px rgba(110,189,138,0.3);
   }
-  .sp-btn.play:hover { background:#6bef9a; transform:scale(1.05); box-shadow:0 4px 28px rgba(74,222,128,0.5); }
+  .sp-btn.play:hover { background:#6bef9a; transform:scale(1.05); box-shadow:0 4px 28px rgba(110,189,138,0.5); }
   .sp-btn.active { color:var(--green); }
 
   .volume-row { display:flex; align-items:center; gap:12px; margin-top:16px; }
@@ -348,7 +349,7 @@
     border-radius:10px; cursor:pointer; transition:background 0.15s;
   }
   .track-item:hover { background:rgba(255,255,255,0.04); }
-  .track-item.playing { background:rgba(74,222,128,0.06); }
+  .track-item.playing { background:rgba(110,189,138,0.06); }
   .track-num { width:20px; font-size:12px; color:var(--text3); text-align:center; flex-shrink:0; }
   .track-item.playing .track-num { color:var(--green); }
   .track-thumb { width:40px; height:40px; border-radius:8px; background:var(--card2); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px; overflow:hidden; }
@@ -364,10 +365,10 @@
     padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;
     letter-spacing:0.5px;
   }
-  .badge-green { background:rgba(74,222,128,0.12); color:var(--green); }
-  .badge-blue { background:rgba(79,124,255,0.12); color:var(--accent); }
-  .badge-orange { background:rgba(251,146,60,0.12); color:var(--orange); }
-  .badge-red { background:rgba(255,107,107,0.12); color:var(--coral); }
+  .badge-green { background:rgba(110,189,138,0.12); color:var(--green); }
+  .badge-blue { background:rgba(79,143,168,0.12); color:var(--accent); }
+  .badge-orange { background:rgba(232,162,95,0.12); color:var(--orange); }
+  .badge-red { background:rgba(240,138,114,0.12); color:var(--coral); }
   .badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
 
   /* ─── NOTIFICATION TOAST ─── */
@@ -388,7 +389,7 @@
     background:var(--bg3); border:1px solid var(--border); color:var(--text2); cursor:pointer;
     transition:all 0.2s;
   }
-  .tag:hover, .tag.active { background:rgba(79,124,255,0.12); border-color:rgba(79,124,255,0.3); color:var(--accent); }
+  .tag:hover, .tag.active { background:rgba(79,143,168,0.12); border-color:rgba(79,143,168,0.3); color:var(--accent); }
 
   /* ─── API CONFIG MODAL ─── */
   .config-overlay {
@@ -408,7 +409,7 @@
     background:var(--bg3); border:1px solid var(--border2); color:var(--text);
     font-family:var(--font-main); font-size:14px; outline:none; transition:border 0.2s;
   }
-  .config-field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,124,255,0.15); }
+  .config-field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,143,168,0.15); }
   .config-field input::placeholder { color:var(--text3); }
 
   /* ─── SCROLLBAR ─── */
@@ -466,6 +467,120 @@
     touch-action: manipulation;
   }
   input[type=range] { touch-action: pan-x; }
+
+  /* ═══════════════════════════════════════════════════════
+     REDISEÑO VISUAL — FONDOS POR HABITACIÓN + GLASSMORPHISM
+     ═══════════════════════════════════════════════════════ */
+
+  /* ─── LOGO SVG (icono casa inteligente) ─── */
+  .logo-icon-svg {
+    width:38px; height:38px; border-radius:11px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(79,143,168,0.35);
+    flex-shrink:0;
+  }
+  .logo-icon-svg svg { width:22px; height:22px; display:block; }
+
+  /* ─── CAPA DE FONDO POR HABITACIÓN/PESTAÑA ─── */
+  .room-bg-layer {
+    position:fixed; inset:0; z-index:-1;
+    background-size:cover; background-position:center; background-repeat:no-repeat;
+    opacity:0; transition:opacity 0.6s ease, background-image 0.3s ease;
+    filter:saturate(0.95) brightness(0.92);
+  }
+  .room-bg-layer.active { opacity:1; }
+  .room-bg-layer::after {
+    content:''; position:absolute; inset:0;
+    background:
+      linear-gradient(180deg, rgba(247,244,238,0.35) 0%, rgba(247,244,238,0.8) 55%, var(--bg) 100%),
+      linear-gradient(90deg, rgba(247,244,238,0.3) 0%, transparent 40%);
+  }
+
+  /* ─── GLASSMORPHISM (estilo dashboard imagen de referencia) ─── */
+  .glass-card {
+    background:rgba(255,255,255,0.55);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    backdrop-filter:blur(18px) saturate(140%);
+    border:1px solid rgba(43,58,69,0.08);
+    box-shadow:0 8px 32px rgba(43,58,69,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .glass-card:hover { border-color:rgba(43,58,69,0.16); }
+
+  /* ─── WIDGETS REDIMENSIONABLES ─── */
+  .widget-resizable {
+    resize:both; overflow:auto; min-width:220px; min-height:150px;
+    max-width:100%;
+  }
+  .widget-resizable::-webkit-resizer {
+    background-image:
+      linear-gradient(135deg, transparent 0 40%, var(--accent) 40% 46%, transparent 46% 54%, var(--accent) 54% 60%, transparent 60%);
+    background-size:10px 10px; background-repeat:no-repeat; background-position:bottom right;
+    width:16px; height:16px;
+  }
+  .widget-resize-hint {
+    position:absolute; bottom:6px; right:8px; font-size:9px;
+    letter-spacing:0.5px; color:var(--text3); pointer-events:none;
+    opacity:0.6; text-transform:uppercase;
+  }
+  .widget-reset-btn {
+    position:absolute; top:10px; right:10px; z-index:2;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border2);
+    color:var(--text3); font-size:11px; width:24px; height:24px;
+    border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity 0.2s;
+  }
+  .widget-resizable:hover .widget-reset-btn { opacity:1; }
+
+  /* ─── SELECTOR DE FONDO ─── */
+  .bg-picker-btn {
+    display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border2);
+    color:var(--text2); font-family:var(--font-main); font-size:12px;
+    padding:6px 12px; border-radius:10px; cursor:pointer; transition:all 0.2s;
+  }
+  .bg-picker-btn:hover { color:var(--text); background:rgba(255,255,255,0.1); }
+  .bg-panel {
+    position:absolute; top:calc(100% + 8px); right:0; z-index:50;
+    background:var(--card); border:1px solid var(--border2); border-radius:16px;
+    padding:16px; width:280px; box-shadow:0 12px 40px rgba(0,0,0,0.5);
+    display:none;
+  }
+  .bg-panel.show { display:block; }
+  .bg-panel-title { font-size:12px; color:var(--text2); margin-bottom:10px; letter-spacing:0.5px; }
+  .bg-thumb-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .bg-thumb {
+    aspect-ratio:1; border-radius:10px; background-size:cover; background-position:center;
+    cursor:pointer; border:2px solid transparent; transition:all 0.15s; position:relative;
+  }
+  .bg-thumb:hover { transform:scale(1.05); }
+  .bg-thumb.active { border-color:var(--accent); box-shadow:0 0 0 2px rgba(79,143,168,0.3); }
+  .bg-upload-label {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; border-radius:10px; border:1px dashed var(--border2);
+    color:var(--text2); font-size:12px; cursor:pointer; transition:all 0.2s;
+  }
+  .bg-upload-label:hover { border-color:var(--accent); color:var(--text); }
+  .bg-clear-btn { width:100%; margin-top:8px; }
+
+  /* ─── NOTICIAS ─── */
+  .news-item {
+    display:flex; gap:12px; padding:12px; border-radius:12px; cursor:pointer;
+    transition:background 0.15s; text-decoration:none; color:inherit;
+  }
+  .news-item:hover { background:rgba(255,255,255,0.05); }
+  .news-thumb {
+    width:64px; height:64px; border-radius:10px; flex-shrink:0; background-size:cover;
+    background-position:center; background-color:var(--card2); display:flex;
+    align-items:center; justify-content:center; font-size:22px;
+  }
+  .news-headline { font-size:14px; font-weight:600; line-height:1.35; color:var(--text); }
+  .news-meta { font-size:11px; color:var(--text3); margin-top:4px; letter-spacing:0.3px; }
+
+  @media(max-width:600px){
+    .bg-panel { right:-60px; width:250px; }
+    .widget-resizable { min-width:160px; }
+  }
 </style>
 </head>
 <body>
@@ -492,6 +607,10 @@
       <label style="margin-top:10px;display:block;">Tuya Local Key</label>
       <input type="text" id="tuya-local-key" placeholder="xxxxxxxxxxxxxxxx">
     </div>
+    <div class="config-field" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <label>📰 NewsAPI Key (newsapi.org)</label>
+      <input type="text" id="news-api-key" placeholder="Tu API key de NewsAPI">
+    </div>
     <div class="btn-row" style="margin-top:24px;">
       <button class="btn btn-primary btn-lg" style="flex:1;" onclick="saveConfig()">Guardar →</button>
     </div>
@@ -505,14 +624,40 @@
   <!-- Top Bar -->
   <div class="topbar">
     <div class="logo">
-      <div class="logo-icon">🏠</div>
+      <div class="logo-icon-svg">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <path d="M50 8 L92 42 L84 42 L84 40 L74 32" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M50 8 L8 42 L30 42" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="92" cy="42" r="5" fill="#fff"/>
+          <path d="M8 42 L20 42 L20 58 L38 58 L38 46 L46 46" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="46" cy="46" r="5" fill="#fff"/>
+          <path d="M8 42 L14 42 L14 90 L86 90 L86 42 L84 42" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="52" y="64" width="16" height="16" rx="2" fill="#fff" opacity="0.9"/>
+          <rect x="70" y="64" width="16" height="16" rx="2" fill="#fff" opacity="0.9"/>
+          <rect x="52" y="82" width="16" height="8" fill="#fff" opacity="0.9"/>
+          <rect x="70" y="82" width="16" height="8" fill="#fff" opacity="0.9"/>
+        </svg>
+      </div>
       <div class="logo-text">Mi Casa <span>Inteligente</span></div>
     </div>
     <div class="topbar-right">
+      <button class="bg-picker-btn" onclick="document.getElementById('configOverlay').style.display='flex'" title="Configurar APIs">⚙️</button>
+      <div style="position:relative;">
+        <button class="bg-picker-btn" onclick="toggleBgPanel()">🖼️ Fondo</button>
+        <div class="bg-panel" id="bg-panel">
+          <div class="bg-panel-title">Fondo para «<span id="bg-panel-room">Sala</span>»</div>
+          <div class="bg-thumb-grid" id="bg-thumb-grid"></div>
+          <label class="bg-upload-label">
+            📤 Subir mi propia imagen
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadCustomBg(event)">
+          </label>
+          <button class="btn bg-clear-btn" onclick="clearRoomBg()">Quitar fondo personalizado</button>
+        </div>
+      </div>
       <button id="install-btn" onclick="installPWA()"
         style="display:none;align-items:center;gap:6px;
                padding:6px 14px;border-radius:10px;border:1px solid var(--accent);
-               background:rgba(79,124,255,0.12);color:var(--accent);
+               background:rgba(79,143,168,0.12);color:var(--accent);
                font-family:var(--font-main);font-size:13px;font-weight:500;
                cursor:pointer;">
         ⬇ Instalar app
@@ -521,6 +666,13 @@
       <div class="status-dot" title="Sistema activo"></div>
     </div>
   </div>
+
+  <!-- Capas de fondo por habitación -->
+  <div class="room-bg-layer active" id="room-bg-home" data-room="home"></div>
+  <div class="room-bg-layer" id="room-bg-lights" data-room="lights"></div>
+  <div class="room-bg-layer" id="room-bg-weather" data-room="weather"></div>
+  <div class="room-bg-layer" id="room-bg-spotify" data-room="spotify"></div>
+  <div class="room-bg-layer" id="room-bg-perfil" data-room="perfil"></div>
 
   <!-- Nav -->
   <div class="nav">
@@ -545,28 +697,28 @@
     <!-- Stat Row -->
     <div class="grid-4" style="margin-bottom:20px;">
       <div class="card card-sm stat-card">
-        <div class="stat-icon" style="background:rgba(79,124,255,0.12);">💡</div>
+        <div class="stat-icon" style="background:rgba(79,143,168,0.12);">💡</div>
         <div>
           <div class="stat-val" id="home-light-status" style="color:var(--accent);">OFF</div>
           <div class="stat-label">Foco Principal</div>
         </div>
       </div>
       <div class="card card-sm stat-card">
-        <div class="stat-icon" style="background:rgba(0,229,176,0.12);">🌡️</div>
+        <div class="stat-icon" style="background:rgba(63,174,158,0.12);">🌡️</div>
         <div>
           <div class="stat-val" id="home-temp" style="color:var(--teal);">--°C</div>
           <div class="stat-label">Temperatura</div>
         </div>
       </div>
       <div class="card card-sm stat-card">
-        <div class="stat-icon" style="background:rgba(74,222,128,0.12);">🎵</div>
+        <div class="stat-icon" style="background:rgba(110,189,138,0.12);">🎵</div>
         <div>
           <div class="stat-val" id="home-music-status" style="color:var(--green);">—</div>
           <div class="stat-label">Reproduciendo</div>
         </div>
       </div>
       <div class="card card-sm stat-card">
-        <div class="stat-icon" style="background:rgba(245,200,66,0.12);">⏰</div>
+        <div class="stat-icon" style="background:rgba(217,169,104,0.12);">⏰</div>
         <div>
           <div class="stat-val" id="home-date" style="color:var(--gold);">—</div>
           <div class="stat-label">Fecha</div>
@@ -574,12 +726,13 @@
       </div>
     </div>
 
-    <!-- Quick Controls -->
-    <div class="grid-2" style="margin-bottom:20px;">
+    <!-- Quick Controls — REDIMENSIONABLES -->
+    <div class="grid-2" style="margin-bottom:20px;align-items:start;">
       <!-- Quick Light -->
-      <div class="card">
+      <div class="card glass-card widget-resizable" id="widget-light" style="position:relative;">
+        <button class="widget-reset-btn" onclick="resetWidgetSize('widget-light')" title="Restablecer tamaño">↺</button>
         <div class="card-label">Control Rápido</div>
-        <div class="card-title" style="margin-bottom:16px;">💡 Foco Sonoff</div>
+        <div class="card-title" style="margin-bottom:16px;">💡 Estatus de Foco</div>
         <div style="display:flex;align-items:center;gap:20px;">
           <div class="bulb-preview" id="home-bulb"><div class="bulb-inner" id="home-bulb-inner">💡</div></div>
           <div style="flex:1;">
@@ -596,10 +749,12 @@
         <div class="btn-row">
           <button class="btn" onclick="navigate('lights',document.querySelectorAll('.nav-btn')[1])">Ver detalles →</button>
         </div>
+        <div class="widget-resize-hint">arrastra ↘ para redimensionar</div>
       </div>
 
       <!-- Quick Weather -->
-      <div class="card" style="background:linear-gradient(135deg,#0f1f38,#162040);border-color:rgba(79,124,255,0.2);">
+      <div class="card glass-card widget-resizable" id="widget-weather" style="background:linear-gradient(135deg,rgba(228,240,245,0.75),rgba(207,230,238,0.75));border-color:rgba(79,143,168,0.25);position:relative;">
+        <button class="widget-reset-btn" onclick="resetWidgetSize('widget-weather')" title="Restablecer tamaño">↺</button>
         <div class="card-label">Estado del Clima</div>
         <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
           <div style="font-size:52px;" id="home-wx-icon">🌤</div>
@@ -612,26 +767,42 @@
         <div class="btn-row">
           <button class="btn" onclick="navigate('weather',document.querySelectorAll('.nav-btn')[2])">Ver clima completo →</button>
         </div>
+        <div class="widget-resize-hint">arrastra ↘ para redimensionar</div>
       </div>
     </div>
 
-    <!-- Spotify mini -->
-    <div class="card" style="background:linear-gradient(135deg,#0d1a12,#122210);border-color:rgba(74,222,128,0.12);">
-      <div class="card-label">Reproduciendo Ahora</div>
-      <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
-        <div class="album-art" style="width:64px;height:64px;"><div class="album-art-placeholder" id="home-sp-art" style="font-size:28px;">🎵</div></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:16px;font-weight:600;" id="home-sp-track">Sin reproducción activa</div>
-          <div style="font-size:13px;color:var(--text2);" id="home-sp-artist">Conecta Spotify para ver la música</div>
+    <div class="grid-2" style="margin-bottom:20px;align-items:start;">
+      <!-- Spotify mini -->
+      <div class="card glass-card widget-resizable" id="widget-music" style="background:linear-gradient(135deg,rgba(234,243,236,0.75),rgba(220,236,223,0.75));border-color:rgba(110,189,138,0.25);position:relative;">
+        <button class="widget-reset-btn" onclick="resetWidgetSize('widget-music')" title="Restablecer tamaño">↺</button>
+        <div class="card-label">Reproduciendo Ahora</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
+          <div class="album-art" style="width:64px;height:64px;"><div class="album-art-placeholder" id="home-sp-art" style="font-size:28px;">🎵</div></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:16px;font-weight:600;" id="home-sp-track">Sin reproducción activa</div>
+            <div style="font-size:13px;color:var(--text2);" id="home-sp-artist">Conecta Spotify para ver la música</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="sp-btn" id="home-prev-btn" onclick="spPrev()" title="Anterior">⏮</button>
+            <button class="sp-btn play" id="home-play-btn" onclick="spToggle()" style="width:42px;height:42px;font-size:18px;">▶</button>
+            <button class="sp-btn" id="home-next-btn" onclick="spNext()" title="Siguiente">⏭</button>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;">
-          <button class="sp-btn" id="home-prev-btn" onclick="spPrev()" title="Anterior">⏮</button>
-          <button class="sp-btn play" id="home-play-btn" onclick="spToggle()" style="width:42px;height:42px;font-size:18px;">▶</button>
-          <button class="sp-btn" id="home-next-btn" onclick="spNext()" title="Siguiente">⏭</button>
+        <div class="btn-row">
+          <button class="btn" onclick="navigate('spotify',document.querySelectorAll('.nav-btn')[3])">Abrir reproductor →</button>
         </div>
+        <div class="widget-resize-hint">arrastra ↘ para redimensionar</div>
       </div>
-      <div class="btn-row">
-        <button class="btn" onclick="navigate('spotify',document.querySelectorAll('.nav-btn')[3])">Abrir reproductor →</button>
+
+      <!-- Noticias -->
+      <div class="card glass-card" id="widget-news" style="position:relative;">
+        <div class="card-label">📰 Noticias</div>
+        <div id="news-list" style="margin-top:8px;display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto;">
+          <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Cargando noticias…</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" style="font-size:12px;" onclick="loadNews()">🔄 Actualizar noticias</button>
+        </div>
       </div>
     </div>
   </div>
@@ -819,7 +990,7 @@
       <div style="display:flex;flex-direction:column;gap:16px;">
         <div class="spotify-player">
           <div style="position:relative;z-index:1;">
-            <div class="card-label" style="color:rgba(74,222,128,0.6);">Spotify · Reproduciendo Ahora</div>
+            <div class="card-label" style="color:rgba(110,189,138,0.6);">Spotify · Reproduciendo Ahora</div>
             <div class="track-row" style="margin-top:16px;">
               <div class="album-art" id="sp-album-art">
                 <div class="album-art-placeholder" id="sp-art-placeholder">🎵</div>
@@ -923,7 +1094,7 @@
           background:linear-gradient(135deg,var(--accent),var(--accent2));
           display:flex;align-items:center;justify-content:center;
           font-family:var(--font-display);font-size:38px;font-weight:800;
-          color:#fff;margin:0 auto 20px;box-shadow:0 0 30px rgba(79,124,255,0.4);">
+          color:#fff;margin:0 auto 20px;box-shadow:0 0 30px rgba(79,143,168,0.4);">
           ?
         </div>
         <div id="perfil-nombre-display" style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--text);margin-bottom:4px;">
@@ -1054,6 +1225,7 @@ let cfg = {
   spClientSecret:  '4f52890e442848249fc3524fd8ac271c',
   spToken:         '',
   spCodeVerifier:  '',
+  newsApiKey:      localStorage.getItem('news_api_key') || '',
 };
 
 function toggleLightProtocol(){
@@ -1079,8 +1251,15 @@ function saveConfig(){
   if(tuyaDev){ cfg.tuyaDeviceId = tuyaDev; localStorage.setItem('tuya_device_id', tuyaDev); }
   if(tuyaKey){ cfg.tuyaLocalKey = tuyaKey; localStorage.setItem('tuya_local_key', tuyaKey); }
 
+  const newsKey = document.getElementById('news-api-key').value.trim();
+  if(newsKey){
+    cfg.newsApiKey = newsKey;
+    localStorage.setItem('news_api_key', newsKey);
+    loadNews();
+  }
+
   document.getElementById('configOverlay').style.display = 'none';
-  toast('✅','Configuración del foco guardada');
+  toast('✅','Configuración guardada');
   updateLightDeviceLabel();
 }
 
@@ -1118,6 +1297,227 @@ function navigate(id, btn){
   if(id==='weather') loadWeather();
   if(id==='spotify') spGetCurrentTrack();
   if(id==='perfil')  cargarPerfil();
+  showRoomBg(id);
+}
+
+// ════════════════════════════════════════
+//  FONDOS PERSONALIZADOS POR HABITACIÓN (IndexedDB)
+// ════════════════════════════════════════
+const ROOMS = {
+  home:    { label:'Panel Principal', defaults:[
+    'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=1200&q=70',
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=70',
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=70'
+  ]},
+  lights:  { label:'Iluminación', defaults:[
+    'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200&q=70',
+    'https://images.unsplash.com/photo-1517414294276-0a4406835a56?w=1200&q=70',
+    'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=1200&q=70'
+  ]},
+  weather: { label:'Clima', defaults:[
+    'https://images.unsplash.com/photo-1601134467661-3d775b999c8b?w=1200&q=70',
+    'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=1200&q=70',
+    'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=1200&q=70'
+  ]},
+  spotify: { label:'Música', defaults:[
+    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=70',
+    'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=1200&q=70',
+    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&q=70'
+  ]},
+  perfil:  { label:'Perfil', defaults:[
+    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&q=70',
+    'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1200&q=70',
+    'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=70'
+  ]}
+};
+let currentBgRoom = 'home';
+let idbDB = null;
+
+function openBgDB(){
+  return new Promise((resolve,reject)=>{
+    if(idbDB) return resolve(idbDB);
+    const req = indexedDB.open('miCasaBackgrounds', 1);
+    req.onupgradeneeded = e => { e.target.result.createObjectStore('bgs'); };
+    req.onsuccess = e => { idbDB = e.target.result; resolve(idbDB); };
+    req.onerror = e => reject(e);
+  });
+}
+async function idbSet(key, value){
+  const db = await openBgDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('bgs','readwrite');
+    tx.objectStore('bgs').put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+async function idbGet(key){
+  const db = await openBgDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('bgs','readonly');
+    const req = tx.objectStore('bgs').get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = e => reject(e);
+  });
+}
+async function idbDelete(key){
+  const db = await openBgDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('bgs','readwrite');
+    tx.objectStore('bgs').delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+
+async function applyRoomBackground(room){
+  const layer = document.getElementById('room-bg-'+room);
+  if(!layer) return;
+  const custom = await idbGet('custom_'+room);
+  if(custom){
+    layer.style.backgroundImage = `url(${custom})`;
+    return;
+  }
+  const savedDefault = localStorage.getItem('bg_default_'+room) || (ROOMS[room] ? ROOMS[room].defaults[0] : '');
+  if(savedDefault) layer.style.backgroundImage = `url(${savedDefault})`;
+}
+
+function showRoomBg(room){
+  document.querySelectorAll('.room-bg-layer').forEach(l=>l.classList.remove('active'));
+  const layer = document.getElementById('room-bg-'+room);
+  if(layer) layer.classList.add('active');
+  currentBgRoom = room;
+  const label = document.getElementById('bg-panel-room');
+  if(label && ROOMS[room]) label.textContent = ROOMS[room].label;
+  renderBgThumbs();
+}
+
+function toggleBgPanel(){
+  document.getElementById('bg-panel').classList.toggle('show');
+  renderBgThumbs();
+}
+
+async function renderBgThumbs(){
+  const grid = document.getElementById('bg-thumb-grid');
+  if(!grid || !ROOMS[currentBgRoom]) return;
+  const custom = await idbGet('custom_'+currentBgRoom);
+  const currentUrl = custom || localStorage.getItem('bg_default_'+currentBgRoom) || ROOMS[currentBgRoom].defaults[0];
+  grid.innerHTML = ROOMS[currentBgRoom].defaults.map(url => `
+    <div class="bg-thumb ${!custom && url===currentUrl ? 'active':''}" style="background-image:url(${url})" onclick="selectDefaultBg('${url}')"></div>
+  `).join('');
+  if(custom){
+    grid.innerHTML += `<div class="bg-thumb active" style="background-image:url(${custom})" title="Tu imagen personalizada"></div>`;
+  }
+}
+
+function selectDefaultBg(url){
+  localStorage.setItem('bg_default_'+currentBgRoom, url);
+  idbDelete('custom_'+currentBgRoom);
+  applyRoomBackground(currentBgRoom);
+  renderBgThumbs();
+}
+
+function uploadCustomBg(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  if(file.size > 6*1024*1024){ toast('⚠️','Imagen muy pesada (máx. 6MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = async () => {
+    await idbSet('custom_'+currentBgRoom, reader.result);
+    applyRoomBackground(currentBgRoom);
+    renderBgThumbs();
+    toast('🖼️','Fondo personalizado aplicado');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function clearRoomBg(){
+  await idbDelete('custom_'+currentBgRoom);
+  localStorage.removeItem('bg_default_'+currentBgRoom);
+  applyRoomBackground(currentBgRoom);
+  renderBgThumbs();
+  toast('🗑️','Fondo restablecido');
+}
+
+async function initBackgrounds(){
+  for(const room in ROOMS){ await applyRoomBackground(room); }
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('bg-panel');
+  if(panel && panel.classList.contains('show') && !panel.contains(e.target) && !e.target.closest('.bg-picker-btn')){
+    panel.classList.remove('show');
+  }
+});
+
+// ════════════════════════════════════════
+//  WIDGETS REDIMENSIONABLES (persisten tamaño por usuario)
+// ════════════════════════════════════════
+function initResizableWidgets(){
+  document.querySelectorAll('.widget-resizable').forEach(w => {
+    const saved = localStorage.getItem('widget_size_'+w.id);
+    if(saved){
+      try{
+        const {width,height} = JSON.parse(saved);
+        if(width) w.style.width = width;
+        if(height) w.style.height = height;
+      }catch(e){}
+    }
+    let resizeTimer;
+    new ResizeObserver(() => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        localStorage.setItem('widget_size_'+w.id, JSON.stringify({width:w.style.width||w.offsetWidth+'px', height:w.style.height||w.offsetHeight+'px'}));
+      }, 400);
+    }).observe(w);
+  });
+}
+function resetWidgetSize(id){
+  const w = document.getElementById(id);
+  if(!w) return;
+  w.style.width = '';
+  w.style.height = '';
+  localStorage.removeItem('widget_size_'+id);
+  toast('↺','Tamaño restablecido');
+}
+
+// ════════════════════════════════════════
+//  NOTICIAS (NewsAPI)
+// ════════════════════════════════════════
+async function loadNews(){
+  const list = document.getElementById('news-list');
+  if(!list) return;
+  if(!cfg.newsApiKey){
+    list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px;">
+      Configura tu API key de NewsAPI en ⚙️ para ver noticias aquí.</div>`;
+    return;
+  }
+  list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Cargando noticias…</div>`;
+  try{
+    const url = `https://newsapi.org/v2/top-headlines?country=mx&pageSize=6&apiKey=${cfg.newsApiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status !== 'ok') throw new Error(data.message || 'Error de NewsAPI');
+    if(!data.articles || !data.articles.length){
+      list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px;">Sin noticias disponibles.</div>`;
+      return;
+    }
+    list.innerHTML = data.articles.map(a => `
+      <a class="news-item" href="${a.url}" target="_blank" rel="noopener">
+        <div class="news-thumb" style="${a.urlToImage ? `background-image:url(${a.urlToImage})` : ''}">${a.urlToImage ? '' : '📰'}</div>
+        <div style="min-width:0;">
+          <div class="news-headline">${a.title || 'Sin título'}</div>
+          <div class="news-meta">${a.source?.name || 'Fuente desconocida'}</div>
+        </div>
+      </a>
+    `).join('');
+  }catch(e){
+    console.error(e);
+    // NewsAPI (plan gratuito) solo permite solicitudes desde localhost por CORS.
+    // En producción (Render.com) esta llamada debe pasar por un proxy en server.py.
+    list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px;">
+      No se pudieron cargar noticias. Si estás en producción, NewsAPI (plan gratuito) requiere un proxy en el backend — dime si quieres que lo agreguemos a server.py.</div>`;
+  }
 }
 
 // ════════════════════════════════════════
@@ -1963,8 +2363,8 @@ async function spGetDevices(){
       return `<div onclick="selectDevice('${dev.id}','${dev.name.replace(/'/g,"\'")}')"
         style="display:flex;align-items:center;gap:10px;padding:10px 12px;
                border-radius:10px;cursor:pointer;margin-bottom:4px;
-               background:${selected?'rgba(74,222,128,0.1)':'transparent'};
-               border:1px solid ${selected?'rgba(74,222,128,0.4)':'var(--border)'};
+               background:${selected?'rgba(110,189,138,0.1)':'transparent'};
+               border:1px solid ${selected?'rgba(110,189,138,0.4)':'var(--border)'};
                transition:all 0.2s;">
         <span style="font-size:22px;">${dev.type==='Computer'?'💻':dev.type==='Smartphone'?'📱':dev.name.toLowerCase().includes('pi')||dev.name.toLowerCase().includes('casa')?'🖥️':'🔊'}</span>
         <div style="flex:1;">
@@ -2219,6 +2619,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   checkSpotifyToken();
   // Carga clima con geolocalización
   loadWeather();
+  // Fondos personalizados por habitación + widgets redimensionables + noticias
+  await initBackgrounds();
+  showRoomBg('home');
+  initResizableWidgets();
+  loadNews();
   // Aviso de configuración pendiente
   setTimeout(() => {
     if(!cfg.spToken){
@@ -2227,6 +2632,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const falta = [];
     if(!cfg.owmKey)   falta.push('🌤 OWM Key');
     if(!cfg.sonoffIp) falta.push('💡 IP Sonoff');
+    if(!cfg.newsApiKey) falta.push('📰 NewsAPI Key');
     if(falta.length)  toast('⚙️','Configura: ' + falta.join(' · '));
   }, 2000);
 });
