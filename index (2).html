@@ -1,0 +1,2677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mi Casa">
+<meta name="theme-color" content="#f7f4ee">
+<meta name="description" content="Control inteligente del hogar — Luces, Clima y Música">
+<title>Mi Casa Inteligente</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ee;
+    --bg2: #f1ece1;
+    --bg3: #e6ded0;
+    --card: #ffffff;
+    --card2: #f5f1e8;
+    --border: rgba(38,51,61,0.08);
+    --border2: rgba(38,51,61,0.14);
+    --text: #2b3a45;
+    --text2: #6c7f8a;
+    --text3: #9fb0b8;
+    --accent: #4f8fa8;
+    --accent2: #35708f;
+    --gold: #d9a968;
+    --teal: #3fae9e;
+    --coral: #f08a72;
+    --pink: #e79bb8;
+    --green: #6ebd8a;
+    --orange: #e8a25f;
+    --font-main: 'Space Grotesk', sans-serif;
+    --font-display: 'Syne', sans-serif;
+    --r: 16px;
+    --r2: 24px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; min-height:100vh; background:var(--bg); color:var(--text); font-family:var(--font-main); overflow-x:hidden; }
+
+  /* ─── AMBIENT BACKGROUND ─── */
+  body::before {
+    content:'';
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background: radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,143,168,0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(63,174,158,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(217,169,104,0.06) 0%, transparent 70%);
+  }
+
+  /* ─── LAYOUT ─── */
+  .app { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:0 24px 40px; }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 0 0;
+  }
+  .logo { display:flex; align-items:center; gap:10px; }
+  .logo-icon {
+    width:36px; height:36px; border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+  }
+  .logo-text { font-family:var(--font-display); font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+  .logo-text span { color:var(--text2); font-weight:400; }
+  .topbar-right { display:flex; align-items:center; gap:16px; }
+  .time-badge {
+    background:var(--card); border:1px solid var(--border2); border-radius:10px;
+    padding:6px 14px; font-size:13px; color:var(--text2); letter-spacing:0.5px;
+  }
+  .time-badge #live-clock { color:var(--text); font-weight:600; }
+  .status-dot {
+    width:8px; height:8px; border-radius:50%; background:var(--teal);
+    box-shadow:0 0 8px var(--teal); animation:pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* ─── NAV ─── */
+  .nav {
+    display:flex; gap:4px; margin:24px 0;
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:6px; width:fit-content;
+  }
+  .nav-btn {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 20px; border-radius:10px; border:none;
+    background:transparent; color:var(--text2); font-family:var(--font-main);
+    font-size:14px; font-weight:500; cursor:pointer; transition:all 0.2s;
+    white-space:nowrap;
+  }
+  .nav-btn:hover { color:var(--text); background:var(--card2); }
+  .nav-btn.active {
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; box-shadow:0 4px 20px rgba(79,143,168,0.3);
+  }
+  .nav-btn .nav-icon { font-size:16px; }
+
+  /* ─── SECTIONS ─── */
+  .section { display:none; }
+  .section.active { display:block; }
+
+  /* ─── GRID ─── */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .span-2 { grid-column:span 2; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--r2); padding:24px; position:relative; overflow:hidden;
+    transition:border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color:var(--border2); }
+  .card-sm { padding:18px 20px; }
+
+  .card-label {
+    font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--text3); margin-bottom:8px;
+  }
+  .card-title {
+    font-family:var(--font-display); font-size:22px; font-weight:700;
+    color:var(--text); line-height:1.2;
+  }
+  .card-value {
+    font-family:var(--font-display); font-size:36px; font-weight:800;
+    line-height:1; letter-spacing:-1px;
+  }
+  .card-sub { font-size:13px; color:var(--text2); margin-top:6px; }
+
+  /* ─── ACCENT GLOW CARD ─── */
+  .card-glow::after {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:120px; height:120px; border-radius:50%;
+    background:radial-gradient(circle, var(--glow-color,rgba(79,143,168,0.15)) 0%, transparent 70%);
+    pointer-events:none;
+  }
+
+  /* ─── GREETING ─── */
+  .greeting-section {
+    background: linear-gradient(135deg,var(--card),var(--card2));
+    border:1px solid var(--border2); border-radius:var(--r2);
+    padding:36px 40px; margin-bottom:20px; position:relative; overflow:hidden;
+  }
+  .greeting-section::before {
+    content:''; position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none;
+    background:linear-gradient(135deg,rgba(79,143,168,0.05) 0%,rgba(53,112,143,0.05) 100%);
+  }
+  .greeting-eyebrow { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--text3); margin-bottom:12px; }
+  .greeting-main { font-family:var(--font-display); font-size:40px; font-weight:800; line-height:1.1; margin-bottom:10px; }
+  .greeting-main .name { color:var(--accent); }
+  .greeting-sub { font-size:16px; color:var(--text2); max-width:500px; }
+  .greeting-time-icon { font-size:64px; position:absolute; right:40px; top:50%; transform:translateY(-50%); opacity:0.15; }
+
+  /* ─── STAT CARDS ─── */
+  .stat-card { display:flex; flex-direction:column; justify-content:space-between; min-height:110px; }
+  .stat-icon {
+    width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:12px;
+  }
+  .stat-val { font-family:var(--font-display); font-size:28px; font-weight:800; line-height:1; }
+  .stat-label { font-size:12px; color:var(--text2); margin-top:4px; }
+
+  /* ─── TOGGLE ─── */
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; margin-top:16px; }
+  .toggle {
+    width:48px; height:26px; border-radius:13px; background:var(--bg3);
+    border:1px solid var(--border2); cursor:pointer; position:relative; transition:all 0.3s;
+    flex-shrink:0;
+  }
+  .toggle.on { background:linear-gradient(135deg,var(--accent),var(--accent2)); border-color:transparent; box-shadow:0 0 12px rgba(79,143,168,0.4); }
+  .toggle::after {
+    content:''; position:absolute; top:3px; left:3px;
+    width:18px; height:18px; border-radius:50%; background:#fff;
+    transition:transform 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.4);
+  }
+  .toggle.on::after { transform:translateX(22px); }
+
+  /* ─── SLIDER ─── */
+  .slider-wrap { margin-top:16px; }
+  .slider-label { display:flex; justify-content:space-between; font-size:12px; color:var(--text2); margin-bottom:8px; }
+  .slider-label span:last-child { color:var(--text); font-weight:600; }
+  input[type=range] {
+    width:100%; height:4px; border-radius:2px; outline:none; border:none;
+    -webkit-appearance:none; cursor:pointer;
+    background:linear-gradient(to right, var(--accent) 0%, var(--accent) var(--pct,50%), var(--bg3) var(--pct,50%), var(--bg3) 100%);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:#fff; box-shadow:0 2px 8px rgba(79,143,168,0.5), 0 0 0 3px rgba(79,143,168,0.2);
+    cursor:pointer; transition:transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.15); }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px 20px; border-radius:10px; border:1px solid var(--border2);
+    background:var(--card2); color:var(--text); font-family:var(--font-main);
+    font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s;
+  }
+  .btn:hover { background:var(--bg3); border-color:var(--border2); transform:translateY(-1px); }
+  .btn:active { transform:translateY(0); }
+  .btn-primary {
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-color:transparent; color:#fff;
+    box-shadow:0 4px 16px rgba(79,143,168,0.3);
+  }
+  .btn-primary:hover { box-shadow:0 6px 24px rgba(79,143,168,0.4); }
+  .btn-icon {
+    width:42px; height:42px; padding:0; border-radius:12px;
+  }
+  .btn-circle {
+    width:52px; height:52px; padding:0; border-radius:50%; font-size:20px;
+  }
+  .btn-lg { padding:14px 28px; font-size:15px; border-radius:12px; }
+  .btn-row { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+
+  /* ─── COLOR SWATCHES ─── */
+  .color-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-top:12px; }
+  .swatch {
+    aspect-ratio:1; border-radius:10px; cursor:pointer; border:2px solid transparent;
+    transition:all 0.2s; position:relative;
+  }
+  .swatch:hover { transform:scale(1.1); }
+  .swatch.active { border-color:#fff; box-shadow:0 0 12px currentColor; }
+  .swatch::after { content:''; position:absolute; inset:0; border-radius:8px; background:rgba(255,255,255,0.1); opacity:0; transition:opacity 0.2s; }
+  .swatch:hover::after { opacity:1; }
+
+  /* ─── COLOR WHEEL PREVIEW ─── */
+  .bulb-preview {
+    width:80px; height:80px; border-radius:50%; margin:0 auto 16px;
+    position:relative; transition:all 0.4s;
+    box-shadow:0 0 0 0px rgba(255,255,255,0.1);
+  }
+  .bulb-preview.on {
+    box-shadow:0 0 30px 10px var(--bulb-glow, rgba(255,220,100,0.5));
+  }
+  .bulb-inner {
+    width:100%; height:100%; border-radius:50%;
+    background:var(--bulb-color, #ffd264);
+    transition:background 0.4s;
+    display:flex; align-items:center; justify-content:center;
+    font-size:36px;
+  }
+
+  /* ─── WEATHER ─── */
+  .weather-hero {
+    background:linear-gradient(135deg,#e4f0f5,#cfe6ee);
+    border:1px solid rgba(79,143,168,0.2);
+    border-radius:var(--r2); padding:32px; position:relative; overflow:hidden;
+  }
+  .weather-hero::before {
+    content:''; position:absolute; top:-30%; right:-10%;
+    width:300px; height:300px; border-radius:50%;
+    background:radial-gradient(circle,rgba(79,143,168,0.1) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .weather-temp { font-family:var(--font-display); font-size:72px; font-weight:800; line-height:1; }
+  .weather-temp sup { font-size:32px; vertical-align:super; margin-left:2px; color:var(--text2); }
+  .weather-city { font-size:14px; color:var(--text2); margin-top:4px; letter-spacing:0.5px; }
+  .weather-desc { font-size:18px; color:var(--text); margin-top:8px; font-weight:500; }
+  .weather-icon-big { font-size:80px; position:absolute; right:32px; top:50%; transform:translateY(-50%); }
+  .weather-stats { display:flex; gap:20px; margin-top:20px; flex-wrap:wrap; }
+  .wstat { font-size:13px; color:var(--text2); }
+  .wstat strong { display:block; font-size:16px; font-weight:600; color:var(--text); margin-bottom:2px; }
+
+  .forecast-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:20px; }
+  .forecast-item {
+    background:var(--card); border:1px solid var(--border); border-radius:var(--r);
+    padding:14px; text-align:center;
+  }
+  .forecast-day { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .forecast-icon { font-size:28px; margin:6px 0; }
+  .forecast-temps { font-size:13px; }
+  .forecast-max { font-weight:700; color:var(--text); }
+  .forecast-min { color:var(--text2); margin-left:4px; }
+
+  /* ─── SPOTIFY ─── */
+  .spotify-player {
+    background:linear-gradient(135deg,#eaf3ec,#dcecdf);
+    border:1px solid rgba(110,189,138,0.15);
+    border-radius:var(--r2); padding:32px; position:relative; overflow:hidden;
+  }
+  .spotify-player::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 60% 60% at 80% 20%, rgba(110,189,138,0.05) 0%, transparent 70%);
+  }
+  .album-art {
+    width:120px; height:120px; border-radius:16px; overflow:hidden;
+    background:var(--card); flex-shrink:0; position:relative;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  }
+  .album-art img { width:100%; height:100%; object-fit:cover; }
+  .album-art-placeholder {
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#dceee2,#eef6ec); font-size:40px;
+  }
+  .track-info { flex:1; min-width:0; }
+  .track-name { font-family:var(--font-display); font-size:22px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .track-artist { font-size:14px; color:var(--text2); margin-top:4px; }
+  .track-row { display:flex; gap:20px; align-items:center; margin-bottom:20px; }
+
+  .progress-wrap { margin:16px 0; }
+  .progress-times { display:flex; justify-content:space-between; font-size:11px; color:var(--text3); margin-bottom:6px; }
+  .progress-bar-bg { height:4px; background:var(--bg3); border-radius:2px; cursor:pointer; position:relative; }
+  .progress-bar-fill { height:100%; border-radius:2px; background:var(--green); transition:width 0.5s linear; }
+  .progress-thumb {
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:12px; height:12px; border-radius:50%; background:#fff;
+    box-shadow:0 0 8px rgba(110,189,138,0.5); cursor:grab;
+    opacity:0; transition:opacity 0.2s;
+  }
+  .progress-wrap:hover .progress-thumb { opacity:1; }
+
+  .sp-controls { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:16px; }
+  .sp-btn { background:none; border:none; color:var(--text2); cursor:pointer; font-size:20px; transition:all 0.2s; display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; }
+  .sp-btn:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+  .sp-btn.play {
+    width:52px; height:52px; background:var(--green); color:#fff;
+    font-size:22px; box-shadow:0 4px 20px rgba(110,189,138,0.3);
+  }
+  .sp-btn.play:hover { background:#6bef9a; transform:scale(1.05); box-shadow:0 4px 28px rgba(110,189,138,0.5); }
+  .sp-btn.active { color:var(--green); }
+
+  .volume-row { display:flex; align-items:center; gap:12px; margin-top:16px; }
+  .volume-row .vol-icon { font-size:16px; color:var(--text3); }
+  .volume-row input[type=range] {
+    --accent: #4ade80;
+    flex:1;
+  }
+
+  .playlist { margin-top:20px; }
+  .playlist-title { font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:12px; }
+  .track-item {
+    display:flex; align-items:center; gap:12px; padding:10px 12px;
+    border-radius:10px; cursor:pointer; transition:background 0.15s;
+  }
+  .track-item:hover { background:rgba(255,255,255,0.04); }
+  .track-item.playing { background:rgba(110,189,138,0.06); }
+  .track-num { width:20px; font-size:12px; color:var(--text3); text-align:center; flex-shrink:0; }
+  .track-item.playing .track-num { color:var(--green); }
+  .track-thumb { width:40px; height:40px; border-radius:8px; background:var(--card2); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px; overflow:hidden; }
+  .track-thumb img { width:100%; height:100%; object-fit:cover; }
+  .track-details { flex:1; min-width:0; }
+  .track-n { font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .track-a { font-size:12px; color:var(--text2); margin-top:2px; }
+  .track-dur { font-size:12px; color:var(--text3); flex-shrink:0; }
+
+  /* ─── DEVICE STATUS BADGE ─── */
+  .badge {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;
+    letter-spacing:0.5px;
+  }
+  .badge-green { background:rgba(110,189,138,0.12); color:var(--green); }
+  .badge-blue { background:rgba(79,143,168,0.12); color:var(--accent); }
+  .badge-orange { background:rgba(232,162,95,0.12); color:var(--orange); }
+  .badge-red { background:rgba(240,138,114,0.12); color:var(--coral); }
+  .badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+
+  /* ─── NOTIFICATION TOAST ─── */
+  #toast {
+    position:fixed; bottom:24px; right:24px; z-index:9999;
+    background:var(--card2); border:1px solid var(--border2); border-radius:12px;
+    padding:14px 20px; font-size:14px; color:var(--text);
+    box-shadow:0 8px 32px rgba(0,0,0,0.4); transform:translateY(80px); opacity:0;
+    transition:all 0.3s; max-width:300px; display:flex; align-items:center; gap:10px;
+  }
+  #toast.show { transform:translateY(0); opacity:1; }
+  #toast .t-icon { font-size:18px; }
+
+  /* ─── TAGS ─── */
+  .tag-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .tag {
+    padding:4px 12px; border-radius:20px; font-size:12px; font-weight:500;
+    background:var(--bg3); border:1px solid var(--border); color:var(--text2); cursor:pointer;
+    transition:all 0.2s;
+  }
+  .tag:hover, .tag.active { background:rgba(79,143,168,0.12); border-color:rgba(79,143,168,0.3); color:var(--accent); }
+
+  /* ─── API CONFIG MODAL ─── */
+  .config-overlay {
+    position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.75);
+    display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
+  }
+  .config-modal {
+    background:var(--card); border:1px solid var(--border2); border-radius:24px;
+    padding:36px; width:500px; max-width:90vw;
+  }
+  .config-modal h2 { font-family:var(--font-display); font-size:24px; margin-bottom:8px; }
+  .config-modal p { font-size:14px; color:var(--text2); margin-bottom:24px; }
+  .config-field { margin-bottom:16px; }
+  .config-field label { display:block; font-size:12px; color:var(--text2); margin-bottom:6px; letter-spacing:0.5px; }
+  .config-field input {
+    width:100%; padding:10px 14px; border-radius:10px;
+    background:var(--bg3); border:1px solid var(--border2); color:var(--text);
+    font-family:var(--font-main); font-size:14px; outline:none; transition:border 0.2s;
+  }
+  .config-field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,143,168,0.15); }
+  .config-field input::placeholder { color:var(--text3); }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:900px) {
+    .grid-4 { grid-template-columns:repeat(2,1fr); }
+    .grid-3 { grid-template-columns:1fr 1fr; }
+    .span-2 { grid-column:auto; }
+    .forecast-row { grid-template-columns:repeat(3,1fr); }
+    .weather-icon-big { font-size:50px; right:20px; }
+    .greeting-main { font-size:28px; }
+  }
+  @media(max-width:600px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+    .nav { flex-wrap:wrap; }
+    .forecast-row { grid-template-columns:repeat(2,1fr); }
+    .track-row { flex-direction:column; align-items:flex-start; }
+  }
+
+  /* ── PWA MOBILE OPTIMIZATIONS ── */
+  @media(max-width:480px) {
+    .app { padding:0 12px 80px; }
+    .topbar { padding:16px 0 0; }
+    .logo-text { font-size:15px; }
+    .nav { width:100%; overflow-x:auto; scrollbar-width:none; }
+    .nav::-webkit-scrollbar { display:none; }
+    .nav-btn { padding:8px 14px; font-size:13px; flex-shrink:0; }
+    .nav-btn .nav-icon { display:none; }
+    .greeting-section { padding:20px; }
+    .greeting-main { font-size:22px; }
+    .greeting-time-icon { font-size:40px; right:16px; }
+    .card { padding:16px; }
+    .weather-temp { font-size:52px; }
+    .weather-icon-big { font-size:42px; right:12px; }
+    .track-name { font-size:17px; }
+    .sp-controls { gap:10px; }
+    .sp-btn.play { width:48px; height:48px; }
+    .album-art { width:88px; height:88px; }
+    .color-grid { grid-template-columns:repeat(6,1fr); }
+  }
+
+  /* Safe area para iPhone con notch */
+  @supports(padding:max(0px)) {
+    .app { padding-bottom:max(80px, env(safe-area-inset-bottom) + 16px); }
+    .topbar { padding-top:max(16px, env(safe-area-inset-top) + 8px); }
+  }
+
+  /* Mejorar toque en móvil */
+  .btn, .nav-btn, .toggle, .swatch, .sp-btn, .track-item {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  input[type=range] { touch-action: pan-x; }
+
+  /* ═══════════════════════════════════════════════════════
+     REDISEÑO VISUAL — FONDOS POR HABITACIÓN + GLASSMORPHISM
+     ═══════════════════════════════════════════════════════ */
+
+  /* ─── LOGO SVG (icono casa inteligente) ─── */
+  .logo-icon-svg {
+    width:38px; height:38px; border-radius:11px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(79,143,168,0.35);
+    flex-shrink:0;
+  }
+  .logo-icon-svg svg { width:22px; height:22px; display:block; }
+
+  /* ─── CAPA DE FONDO POR HABITACIÓN/PESTAÑA ─── */
+  .room-bg-layer {
+    position:fixed; inset:0; z-index:-1;
+    background-size:cover; background-position:center; background-repeat:no-repeat;
+    opacity:0; transition:opacity 0.6s ease, background-image 0.3s ease;
+    filter:saturate(0.95) brightness(0.92);
+  }
+  .room-bg-layer.active { opacity:1; }
+  .room-bg-layer::after {
+    content:''; position:absolute; inset:0;
+    background:
+      linear-gradient(180deg, rgba(247,244,238,0.35) 0%, rgba(247,244,238,0.8) 55%, var(--bg) 100%),
+      linear-gradient(90deg, rgba(247,244,238,0.3) 0%, transparent 40%);
+  }
+
+  /* ─── GLASSMORPHISM (estilo dashboard imagen de referencia) ─── */
+  .glass-card {
+    background:rgba(255,255,255,0.55);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    backdrop-filter:blur(18px) saturate(140%);
+    border:1px solid rgba(43,58,69,0.08);
+    box-shadow:0 8px 32px rgba(43,58,69,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .glass-card:hover { border-color:rgba(43,58,69,0.16); }
+
+  /* ─── WIDGETS REDIMENSIONABLES ─── */
+  .widget-resizable {
+    resize:both; overflow:auto; min-width:220px; min-height:150px;
+    max-width:100%;
+  }
+  .widget-resizable::-webkit-resizer {
+    background-image:
+      linear-gradient(135deg, transparent 0 40%, var(--accent) 40% 46%, transparent 46% 54%, var(--accent) 54% 60%, transparent 60%);
+    background-size:10px 10px; background-repeat:no-repeat; background-position:bottom right;
+    width:16px; height:16px;
+  }
+  .widget-resize-hint {
+    position:absolute; bottom:6px; right:8px; font-size:9px;
+    letter-spacing:0.5px; color:var(--text3); pointer-events:none;
+    opacity:0.6; text-transform:uppercase;
+  }
+  .widget-reset-btn {
+    position:absolute; top:10px; right:10px; z-index:2;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border2);
+    color:var(--text3); font-size:11px; width:24px; height:24px;
+    border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    opacity:0; transition:opacity 0.2s;
+  }
+  .widget-resizable:hover .widget-reset-btn { opacity:1; }
+
+  /* ─── SELECTOR DE FONDO ─── */
+  .bg-picker-btn {
+    display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border2);
+    color:var(--text2); font-family:var(--font-main); font-size:12px;
+    padding:6px 12px; border-radius:10px; cursor:pointer; transition:all 0.2s;
+  }
+  .bg-picker-btn:hover { color:var(--text); background:rgba(255,255,255,0.1); }
+  .bg-panel {
+    position:absolute; top:calc(100% + 8px); right:0; z-index:50;
+    background:var(--card); border:1px solid var(--border2); border-radius:16px;
+    padding:16px; width:280px; box-shadow:0 12px 40px rgba(0,0,0,0.5);
+    display:none;
+  }
+  .bg-panel.show { display:block; }
+  .bg-panel-title { font-size:12px; color:var(--text2); margin-bottom:10px; letter-spacing:0.5px; }
+  .bg-thumb-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .bg-thumb {
+    aspect-ratio:1; border-radius:10px; background-size:cover; background-position:center;
+    cursor:pointer; border:2px solid transparent; transition:all 0.15s; position:relative;
+  }
+  .bg-thumb:hover { transform:scale(1.05); }
+  .bg-thumb.active { border-color:var(--accent); box-shadow:0 0 0 2px rgba(79,143,168,0.3); }
+  .bg-upload-label {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; border-radius:10px; border:1px dashed var(--border2);
+    color:var(--text2); font-size:12px; cursor:pointer; transition:all 0.2s;
+  }
+  .bg-upload-label:hover { border-color:var(--accent); color:var(--text); }
+  .bg-clear-btn { width:100%; margin-top:8px; }
+
+  /* ─── NOTICIAS ─── */
+  .news-item {
+    display:flex; gap:12px; padding:12px; border-radius:12px; cursor:pointer;
+    transition:background 0.15s; text-decoration:none; color:inherit;
+  }
+  .news-item:hover { background:rgba(255,255,255,0.05); }
+  .news-thumb {
+    width:64px; height:64px; border-radius:10px; flex-shrink:0; background-size:cover;
+    background-position:center; background-color:var(--card2); display:flex;
+    align-items:center; justify-content:center; font-size:22px;
+  }
+  .news-headline { font-size:14px; font-weight:600; line-height:1.35; color:var(--text); }
+  .news-meta { font-size:11px; color:var(--text3); margin-top:4px; letter-spacing:0.3px; }
+
+  @media(max-width:600px){
+    .bg-panel { right:-60px; width:250px; }
+    .widget-resizable { min-width:160px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- API Config Modal -->
+<div class="config-overlay" id="configOverlay" style="display:none;">
+  <div class="config-modal">
+    <h2>💡 Configurar Foco</h2>
+    <p>Selecciona el protocolo de tu foco e ingresa sus datos de conexión.</p>
+    <div class="config-field">
+      <label>🔶 Protocolo de foco</label>
+      <select id="light-protocol" style="width:100%;padding:10px;border-radius:8px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-family:var(--font-main);" onchange="toggleLightProtocol()">
+        <option value="sonoff">Sonoff (eWeLink LAN)</option>
+        <option value="tuya">Steren / Tuya Cloud</option>
+      </select>
+    </div>
+    <div class="config-field" id="sonoff-fields">
+      <label>💡 IP del foco Sonoff B05 en red local</label>
+      <input type="text" id="sonoff-ip" placeholder="192.168.1.xxx">
+    </div>
+    <div class="config-field" id="tuya-fields" style="display:none;">
+      <label>Tuya Device ID</label>
+      <input type="text" id="tuya-device-id" placeholder="bf1234567890abcdef">
+      <label style="margin-top:10px;display:block;">Tuya Local Key</label>
+      <input type="text" id="tuya-local-key" placeholder="xxxxxxxxxxxxxxxx">
+    </div>
+    <div class="config-field" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <label>📰 NewsAPI Key (newsapi.org)</label>
+      <input type="text" id="news-api-key" placeholder="Tu API key de NewsAPI">
+    </div>
+    <div class="btn-row" style="margin-top:24px;">
+      <button class="btn btn-primary btn-lg" style="flex:1;" onclick="saveConfig()">Guardar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"><span class="t-icon" id="toast-icon">✓</span><span id="toast-msg">Acción realizada</span></div>
+
+<div class="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon-svg">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <path d="M50 8 L92 42 L84 42 L84 40 L74 32" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M50 8 L8 42 L30 42" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="92" cy="42" r="5" fill="#fff"/>
+          <path d="M8 42 L20 42 L20 58 L38 58 L38 46 L46 46" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="46" cy="46" r="5" fill="#fff"/>
+          <path d="M8 42 L14 42 L14 90 L86 90 L86 42 L84 42" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="52" y="64" width="16" height="16" rx="2" fill="#fff" opacity="0.9"/>
+          <rect x="70" y="64" width="16" height="16" rx="2" fill="#fff" opacity="0.9"/>
+          <rect x="52" y="82" width="16" height="8" fill="#fff" opacity="0.9"/>
+          <rect x="70" y="82" width="16" height="8" fill="#fff" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="logo-text">Mi Casa <span>Inteligente</span></div>
+    </div>
+    <div class="topbar-right">
+      <button class="bg-picker-btn" onclick="document.getElementById('configOverlay').style.display='flex'" title="Configurar APIs">⚙️</button>
+      <div style="position:relative;">
+        <button class="bg-picker-btn" onclick="toggleBgPanel()">🖼️ Fondo</button>
+        <div class="bg-panel" id="bg-panel">
+          <div class="bg-panel-title">Fondo para «<span id="bg-panel-room">Sala</span>»</div>
+          <div class="bg-thumb-grid" id="bg-thumb-grid"></div>
+          <label class="bg-upload-label">
+            📤 Subir mi propia imagen
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadCustomBg(event)">
+          </label>
+          <button class="btn bg-clear-btn" onclick="clearRoomBg()">Quitar fondo personalizado</button>
+        </div>
+      </div>
+      <button id="install-btn" onclick="installPWA()"
+        style="display:none;align-items:center;gap:6px;
+               padding:6px 14px;border-radius:10px;border:1px solid var(--accent);
+               background:rgba(79,143,168,0.12);color:var(--accent);
+               font-family:var(--font-main);font-size:13px;font-weight:500;
+               cursor:pointer;">
+        ⬇ Instalar app
+      </button>
+      <div class="time-badge"><span id="live-clock">--:--</span></div>
+      <div class="status-dot" title="Sistema activo"></div>
+    </div>
+  </div>
+
+  <!-- Capas de fondo por habitación -->
+  <div class="room-bg-layer active" id="room-bg-home" data-room="home"></div>
+  <div class="room-bg-layer" id="room-bg-lights" data-room="lights"></div>
+  <div class="room-bg-layer" id="room-bg-weather" data-room="weather"></div>
+  <div class="room-bg-layer" id="room-bg-spotify" data-room="spotify"></div>
+  <div class="room-bg-layer" id="room-bg-perfil" data-room="perfil"></div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <button class="nav-btn active" onclick="navigate('home',this)"><span class="nav-icon">🏠</span>Panel Principal</button>
+    <button class="nav-btn" onclick="navigate('lights',this)"><span class="nav-icon">💡</span>Iluminación</button>
+    <button class="nav-btn" onclick="navigate('weather',this)"><span class="nav-icon">🌤</span>Clima</button>
+    <button class="nav-btn" onclick="navigate('spotify',this)"><span class="nav-icon">🎵</span>Música</button>
+    <button class="nav-btn" onclick="navigate('perfil',this)"><span class="nav-icon">👤</span>Perfil</button>
+
+  </div>
+
+  <!-- ═══════════════════════════════════ HOME ═══════════════════════════════════ -->
+  <div class="section active" id="sec-home">
+    <!-- Greeting -->
+    <div class="greeting-section">
+      <div class="greeting-eyebrow">Panel de Control</div>
+      <div class="greeting-main" id="greeting-text">Buenas tardes, <span class="name">Bienvenido</span> 👋</div>
+      <div class="greeting-sub" id="greeting-sub">Aquí tienes un resumen del estado de tu hogar en tiempo real.</div>
+      <div class="greeting-time-icon" id="greeting-icon">🌅</div>
+    </div>
+
+    <!-- Stat Row -->
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card card-sm stat-card">
+        <div class="stat-icon" style="background:rgba(79,143,168,0.12);">💡</div>
+        <div>
+          <div class="stat-val" id="home-light-status" style="color:var(--accent);">OFF</div>
+          <div class="stat-label">Foco Principal</div>
+        </div>
+      </div>
+      <div class="card card-sm stat-card">
+        <div class="stat-icon" style="background:rgba(63,174,158,0.12);">🌡️</div>
+        <div>
+          <div class="stat-val" id="home-temp" style="color:var(--teal);">--°C</div>
+          <div class="stat-label">Temperatura</div>
+        </div>
+      </div>
+      <div class="card card-sm stat-card">
+        <div class="stat-icon" style="background:rgba(110,189,138,0.12);">🎵</div>
+        <div>
+          <div class="stat-val" id="home-music-status" style="color:var(--green);">—</div>
+          <div class="stat-label">Reproduciendo</div>
+        </div>
+      </div>
+      <div class="card card-sm stat-card">
+        <div class="stat-icon" style="background:rgba(217,169,104,0.12);">⏰</div>
+        <div>
+          <div class="stat-val" id="home-date" style="color:var(--gold);">—</div>
+          <div class="stat-label">Fecha</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Controls — REDIMENSIONABLES -->
+    <div class="grid-2" style="margin-bottom:20px;align-items:start;">
+      <!-- Quick Light -->
+      <div class="card glass-card widget-resizable" id="widget-light" style="position:relative;">
+        <button class="widget-reset-btn" onclick="resetWidgetSize('widget-light')" title="Restablecer tamaño">↺</button>
+        <div class="card-label">Control Rápido</div>
+        <div class="card-title" style="margin-bottom:16px;">💡 Estatus de Foco</div>
+        <div style="display:flex;align-items:center;gap:20px;">
+          <div class="bulb-preview" id="home-bulb"><div class="bulb-inner" id="home-bulb-inner">💡</div></div>
+          <div style="flex:1;">
+            <div class="toggle-row" style="margin-bottom:12px;">
+              <span style="font-size:14px;color:var(--text2);">Encendido</span>
+              <div class="toggle" id="home-toggle" onclick="toggleLightHome()"></div>
+            </div>
+            <div class="slider-wrap">
+              <div class="slider-label"><span>Brillo</span><span id="home-bri-val">70%</span></div>
+              <input type="range" min="1" max="100" value="70" id="home-bri-slider" oninput="updateHomeBrightness(this.value)" style="--pct:70%;">
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="navigate('lights',document.querySelectorAll('.nav-btn')[1])">Ver detalles →</button>
+        </div>
+        <div class="widget-resize-hint">arrastra ↘ para redimensionar</div>
+      </div>
+
+      <!-- Quick Weather -->
+      <div class="card glass-card widget-resizable" id="widget-weather" style="background:linear-gradient(135deg,rgba(228,240,245,0.75),rgba(207,230,238,0.75));border-color:rgba(79,143,168,0.25);position:relative;">
+        <button class="widget-reset-btn" onclick="resetWidgetSize('widget-weather')" title="Restablecer tamaño">↺</button>
+        <div class="card-label">Estado del Clima</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
+          <div style="font-size:52px;" id="home-wx-icon">🌤</div>
+          <div>
+            <div class="card-value" id="home-wx-temp" style="color:#6fa3ff;">--°</div>
+            <div class="card-sub" id="home-wx-city">Cargando ubicación...</div>
+            <div class="card-sub" id="home-wx-desc" style="color:var(--text);">—</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="navigate('weather',document.querySelectorAll('.nav-btn')[2])">Ver clima completo →</button>
+        </div>
+        <div class="widget-resize-hint">arrastra ↘ para redimensionar</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;align-items:start;">
+      <!-- Spotify mini -->
+      <div class="card glass-card widget-resizable" id="widget-music" style="background:linear-gradient(135deg,rgba(234,243,236,0.75),rgba(220,236,223,0.75));border-color:rgba(110,189,138,0.25);position:relative;">
+        <button class="widget-reset-btn" onclick="resetWidgetSize('widget-music')" title="Restablecer tamaño">↺</button>
+        <div class="card-label">Reproduciendo Ahora</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
+          <div class="album-art" style="width:64px;height:64px;"><div class="album-art-placeholder" id="home-sp-art" style="font-size:28px;">🎵</div></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:16px;font-weight:600;" id="home-sp-track">Sin reproducción activa</div>
+            <div style="font-size:13px;color:var(--text2);" id="home-sp-artist">Conecta Spotify para ver la música</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="sp-btn" id="home-prev-btn" onclick="spPrev()" title="Anterior">⏮</button>
+            <button class="sp-btn play" id="home-play-btn" onclick="spToggle()" style="width:42px;height:42px;font-size:18px;">▶</button>
+            <button class="sp-btn" id="home-next-btn" onclick="spNext()" title="Siguiente">⏭</button>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="navigate('spotify',document.querySelectorAll('.nav-btn')[3])">Abrir reproductor →</button>
+        </div>
+        <div class="widget-resize-hint">arrastra ↘ para redimensionar</div>
+      </div>
+
+      <!-- Noticias -->
+      <div class="card glass-card" id="widget-news" style="position:relative;">
+        <div class="card-label">📰 Noticias</div>
+        <div id="news-list" style="margin-top:8px;display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto;">
+          <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Cargando noticias…</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" style="font-size:12px;" onclick="loadNews()">🔄 Actualizar noticias</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ LIGHTS ═══════════════════════════════════ -->
+  <div class="section" id="sec-lights">
+    <div class="grid-2" style="align-items:start;">
+      <!-- Main control -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card" style="text-align:center;">
+          <div class="card-label" style="text-align:left;">Sonoff B05-B-A60 · RGB Wi-Fi</div>
+          <div style="margin:20px 0;">
+            <div class="bulb-preview on" id="bulb-preview" style="--bulb-glow:rgba(255,210,100,0.4);">
+              <div class="bulb-inner" id="bulb-inner">💡</div>
+            </div>
+            <div style="font-size:13px;color:var(--text2);margin-top:4px;" id="bulb-status-text">Encendido · Blanco cálido</div>
+          </div>
+          <div class="toggle-row" style="justify-content:center;gap:16px;margin-bottom:20px;">
+            <span style="font-size:16px;font-weight:500;">Foco</span>
+            <div class="toggle on" id="light-toggle" onclick="toggleLight()"></div>
+            <span class="badge badge-green" id="light-badge"><span class="badge-dot"></span>Encendido</span>
+          </div>
+          <!-- Brightness -->
+          <div class="slider-wrap">
+            <div class="slider-label"><span>🌕 Brillo</span><span id="bri-val">70%</span></div>
+            <input type="range" min="1" max="100" value="70" id="bri-slider" oninput="updateBrightness(this.value)" style="--pct:70%;">
+          </div>
+          <!-- Color Temp -->
+          <div class="slider-wrap" style="margin-top:16px;">
+            <div class="slider-label"><span>🔆 Temperatura de color</span><span id="ct-val">Blanco cálido</span></div>
+            <input type="range" min="2700" max="6500" value="2700" id="ct-slider"
+              oninput="updateColorTemp(this.value)"
+              style="--pct:0%; background:linear-gradient(to right,#ffb347,#fff9e6,#e8f4ff);">
+          </div>
+          <div class="btn-row" style="justify-content:center;margin-top:20px;">
+            <button class="btn btn-primary" onclick="sendLightCmd('on')">Encender</button>
+            <button class="btn" onclick="sendLightCmd('off')">Apagar</button>
+            <button class="btn" onclick="sendLightCmd('night')">🌙 Nocturno</button>
+          </div>
+        </div>
+
+        <!-- Scenes -->
+        <div class="card">
+          <div class="card-label">Escenas Rápidas</div>
+          <div class="grid-2" style="gap:10px;margin-top:12px;">
+            <button class="btn" style="justify-content:flex-start;" onclick="applyScene('relax')">🛋️ Relajación</button>
+            <button class="btn" style="justify-content:flex-start;" onclick="applyScene('focus')">💼 Trabajo</button>
+            <button class="btn" style="justify-content:flex-start;" onclick="applyScene('cinema')">🎬 Cine</button>
+            <button class="btn" style="justify-content:flex-start;" onclick="applyScene('party')">🎉 Fiesta</button>
+            <button class="btn" style="justify-content:flex-start;" onclick="applyScene('reading')">📖 Lectura</button>
+            <button class="btn" style="justify-content:flex-start;" onclick="applyScene('wake')">☀️ Despertar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Color picker -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-label">Selector de Color RGB</div>
+          <div style="margin:16px 0 8px;text-align:center;">
+            <canvas id="colorWheel" width="200" height="200" style="border-radius:50%;cursor:crosshair;display:block;margin:0 auto;"></canvas>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:12px;justify-content:center;">
+            <div id="selectedColorBox" style="width:40px;height:40px;border-radius:10px;background:#ffd264;border:2px solid var(--border2);flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:13px;color:var(--text2);">Color seleccionado</div>
+              <div style="font-size:14px;font-weight:600;" id="selectedColorHex">#FFD264</div>
+            </div>
+            <button class="btn btn-primary" style="margin-left:auto;" onclick="applyColorFromWheel()">Aplicar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Colores Predefinidos</div>
+          <div class="color-grid" id="color-swatches" style="margin-top:12px;grid-template-columns:repeat(6,1fr);">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Información del Dispositivo</div>
+          <div style="margin-top:12px;display:grid;gap:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--text2);">Modelo</span><span>Sonoff B05-B-A60</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--text2);">Protocolo</span><span>eWeLink / LAN</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--text2);">Conexión</span>
+              <span class="badge badge-green"><span class="badge-dot"></span><span id="sonoff-conn-status">Conectado</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;align-items:center;">
+              <span style="color:var(--text2);">IP</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="sonoff-ip-display">–</span>
+                <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="document.getElementById('configOverlay').style.display='flex'">⚙️ Cambiar</button>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--text2);">Brillo actual</span><span id="sonoff-bri-display">70%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ WEATHER ═══════════════════════════════════ -->
+  <div class="section" id="sec-weather">
+    <div class="weather-hero" style="margin-bottom:20px;">
+      <div style="position:relative;z-index:1;">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:12px;">📍 <span id="wx-full-city">Detectando ubicación...</span></div>
+        <div style="display:flex;align-items:flex-end;gap:16px;">
+          <div>
+            <div class="weather-temp"><span id="wx-temp">--</span><sup>°C</sup></div>
+            <div class="weather-desc" id="wx-desc">Cargando...</div>
+          </div>
+        </div>
+        <div class="weather-stats">
+          <div class="wstat"><strong id="wx-feel">--°C</strong>Sensación</div>
+          <div class="wstat"><strong id="wx-hum">--%</strong>Humedad</div>
+          <div class="wstat"><strong id="wx-wind">-- km/h</strong>Viento</div>
+          <div class="wstat"><strong id="wx-vis">-- km</strong>Visibilidad</div>
+          <div class="wstat"><strong id="wx-uv">--</strong>Índice UV</div>
+          <div class="wstat"><strong id="wx-pressure">-- hPa</strong>Presión</div>
+        </div>
+      </div>
+      <div class="weather-icon-big" id="wx-icon-big">🌤</div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">🌅 Amanecer / Atardecer</div>
+        <div style="display:flex;justify-content:space-around;margin-top:16px;text-align:center;">
+          <div>
+            <div style="font-size:32px;">🌄</div>
+            <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--gold);" id="wx-sunrise">--:--</div>
+            <div style="font-size:12px;color:var(--text2);">Amanecer</div>
+          </div>
+          <div style="width:1px;background:var(--border);"></div>
+          <div>
+            <div style="font-size:32px;">🌇</div>
+            <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--orange);" id="wx-sunset">--:--</div>
+            <div style="font-size:12px;color:var(--text2);">Atardecer</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">💧 Precipitación y Nubosidad</div>
+        <div style="margin-top:12px;display:grid;gap:12px;">
+          <div class="slider-wrap">
+            <div class="slider-label"><span>Nubosidad</span><span id="wx-clouds">--%</span></div>
+            <input type="range" id="wx-cloud-bar" min="0" max="100" value="30" disabled style="--pct:30%; pointer-events:none;">
+          </div>
+          <div class="slider-wrap">
+            <div class="slider-label"><span>Humedad</span><span id="wx-hum2">--%</span></div>
+            <input type="range" id="wx-hum-bar" min="0" max="100" value="60" disabled style="--pct:60%; pointer-events:none;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-label">Pronóstico 5 Días</div>
+      <div class="forecast-row" id="forecast-row">
+        <!-- Filled by JS -->
+        <div class="forecast-item"><div class="forecast-day">—</div><div class="forecast-icon">🌤</div><div class="forecast-temps"><span class="forecast-max">--°</span><span class="forecast-min">--°</span></div></div>
+        <div class="forecast-item"><div class="forecast-day">—</div><div class="forecast-icon">🌤</div><div class="forecast-temps"><span class="forecast-max">--°</span><span class="forecast-min">--°</span></div></div>
+        <div class="forecast-item"><div class="forecast-day">—</div><div class="forecast-icon">🌤</div><div class="forecast-temps"><span class="forecast-max">--°</span><span class="forecast-min">--°</span></div></div>
+        <div class="forecast-item"><div class="forecast-day">—</div><div class="forecast-icon">🌤</div><div class="forecast-temps"><span class="forecast-max">--°</span><span class="forecast-min">--°</span></div></div>
+        <div class="forecast-item"><div class="forecast-day">—</div><div class="forecast-icon">🌤</div><div class="forecast-temps"><span class="forecast-max">--°</span><span class="forecast-min">--°</span></div></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="btn btn-primary" onclick="loadWeather()">🔄 Actualizar clima</button>
+      <span style="font-size:12px;color:var(--text3);margin-left:12px;" id="wx-updated">No actualizado</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ SPOTIFY ═══════════════════════════════════ -->
+  <div class="section" id="sec-spotify">
+    <div class="grid-2" style="align-items:start;gap:20px;">
+      <!-- Player -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="spotify-player">
+          <div style="position:relative;z-index:1;">
+            <div class="card-label" style="color:rgba(110,189,138,0.6);">Spotify · Reproduciendo Ahora</div>
+            <div class="track-row" style="margin-top:16px;">
+              <div class="album-art" id="sp-album-art">
+                <div class="album-art-placeholder" id="sp-art-placeholder">🎵</div>
+              </div>
+              <div class="track-info">
+                <div class="track-name" id="sp-track-name">Sin reproducción</div>
+                <div class="track-artist" id="sp-track-artist">Conecta Spotify para comenzar</div>
+                <div class="track-artist" id="sp-track-album" style="margin-top:2px;font-size:12px;color:var(--text3);">—</div>
+                <div style="margin-top:8px;">
+                  <span class="badge badge-green" id="sp-status-badge"><span class="badge-dot"></span>Pausado</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-wrap" id="sp-progress-wrap">
+              <div class="progress-times">
+                <span id="sp-elapsed">0:00</span>
+                <span id="sp-duration">0:00</span>
+              </div>
+              <div class="progress-bar-bg" id="sp-bar-bg" onclick="seekTrack(event)">
+                <div class="progress-bar-fill" id="sp-bar-fill" style="width:0%"></div>
+                <div class="progress-thumb" id="sp-thumb" style="left:0%"></div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="sp-controls">
+              <button class="sp-btn" id="sp-shuffle-btn" onclick="spToggleShuffle()" title="Aleatorio">🔀</button>
+              <button class="sp-btn" onclick="spPrev()" title="Anterior">⏮</button>
+              <button class="sp-btn play" id="sp-play-btn" onclick="spToggle()">▶</button>
+              <button class="sp-btn" onclick="spNext()" title="Siguiente">⏭</button>
+              <button class="sp-btn" id="sp-repeat-btn" onclick="spToggleRepeat()" title="Repetir">🔁</button>
+            </div>
+
+            <!-- Volume -->
+            <div class="volume-row" style="margin-top:12px;">
+              <span class="vol-icon" id="vol-icon">🔈</span>
+              <input type="range" min="0" max="100" value="70" id="sp-vol-slider"
+                oninput="updateVolume(this.value)" style="--pct:70%; --accent:#4ade80;">
+              <span style="font-size:13px;font-weight:600;min-width:36px;" id="sp-vol-val">70%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spotify Auth -->
+        <div class="card" id="sp-auth-card">
+          <div class="card-label">Autenticación Spotify</div>
+          <p style="font-size:14px;color:var(--text2);margin:10px 0 16px;">Conecta tu cuenta de Spotify para controlar la reproducción.</p>
+          <button class="btn btn-primary" onclick="spotifyAuth()">Conectar con Spotify</button>
+          <div id="sp-token-status" style="margin-top:10px;font-size:12px;color:var(--text3);">Sin token de acceso</div>
+        </div>
+      </div>
+
+      <!-- Playlist -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-label">Cola de Reproducción</div>
+          <div style="display:flex;gap:8px;margin:12px 0 16px;">
+            <button class="btn" style="font-size:12px;" onclick="spGetQueue()">🔄 Actualizar cola</button>
+            <button class="btn" style="font-size:12px;" onclick="spGetDevices()">📱 Dispositivos</button>
+          </div>
+          <div class="playlist" id="sp-queue-list">
+            <div style="text-align:center;padding:24px;color:var(--text3);font-size:14px;">
+              Conecta Spotify para ver la cola
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Dispositivos disponibles</div>
+          <div id="sp-devices-list" style="margin-top:12px;font-size:13px;color:var(--text3);">
+            Sin dispositivos encontrados
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">Búsqueda rápida</div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <input type="text" id="sp-search-input"
+              placeholder="Buscar canción, artista..."
+              style="flex:1;padding:10px 14px;border-radius:10px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--font-main);font-size:14px;outline:none;"
+              onkeydown="if(event.key==='Enter')spSearch()">
+            <button class="btn btn-primary" onclick="spSearch()">Buscar</button>
+          </div>
+          <div id="sp-search-results" style="margin-top:12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ═══════════════════════════════════ PERFIL ═══════════════════════════════════ -->
+  <div class="section" id="sec-perfil">
+    <div class="grid-2" style="align-items:start;gap:20px;">
+
+      <!-- Tarjeta principal de perfil -->
+      <div class="card" style="text-align:center;padding:36px 24px;">
+        <!-- Avatar -->
+        <div id="perfil-avatar" style="width:96px;height:96px;border-radius:50%;
+          background:linear-gradient(135deg,var(--accent),var(--accent2));
+          display:flex;align-items:center;justify-content:center;
+          font-family:var(--font-display);font-size:38px;font-weight:800;
+          color:#fff;margin:0 auto 20px;box-shadow:0 0 30px rgba(79,143,168,0.4);">
+          ?
+        </div>
+        <div id="perfil-nombre-display" style="font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--text);margin-bottom:4px;">
+          Tu nombre
+        </div>
+        <div id="perfil-fecha-display" style="font-size:13px;color:var(--text2);margin-bottom:16px;">
+          — Sin fecha de nacimiento —
+        </div>
+        <div id="perfil-cumple-badge" style="display:none;">
+          <div style="background:linear-gradient(135deg,#f5c842,#fb923c);
+            border-radius:12px;padding:12px 20px;margin-bottom:16px;
+            font-size:14px;font-weight:600;color:#000;">
+            🎂 ¡Hoy es tu cumpleaños! 🎉
+          </div>
+        </div>
+        <div id="perfil-edad-display" style="font-size:13px;color:var(--text3);"></div>
+      </div>
+
+      <!-- Formulario de edición -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-label">Información Personal</div>
+
+          <div style="margin-top:16px;display:grid;gap:14px;">
+            <!-- Nombre -->
+            <div>
+              <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Nombre</label>
+              <input type="text" id="perfil-nombre" placeholder="Tu nombre"
+                style="width:100%;padding:10px 14px;border-radius:10px;
+                background:var(--bg3);border:1px solid var(--border2);
+                color:var(--text);font-family:var(--font-main);font-size:14px;
+                outline:none;transition:border 0.2s;"
+                onfocus="this.style.borderColor='var(--accent)'"
+                onblur="this.style.borderColor='var(--border2)'"
+                oninput="previewPerfil()">
+            </div>
+            <!-- Apellido -->
+            <div>
+              <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Apellido</label>
+              <input type="text" id="perfil-apellido" placeholder="Tu apellido"
+                style="width:100%;padding:10px 14px;border-radius:10px;
+                background:var(--bg3);border:1px solid var(--border2);
+                color:var(--text);font-family:var(--font-main);font-size:14px;
+                outline:none;transition:border 0.2s;"
+                onfocus="this.style.borderColor='var(--accent)'"
+                onblur="this.style.borderColor='var(--border2)'"
+                oninput="previewPerfil()">
+            </div>
+            <!-- Fecha de nacimiento -->
+            <div>
+              <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Fecha de nacimiento</label>
+              <input type="date" id="perfil-nacimiento"
+                style="width:100%;padding:10px 14px;border-radius:10px;
+                background:var(--bg3);border:1px solid var(--border2);
+                color:var(--text);font-family:var(--font-main);font-size:14px;
+                outline:none;transition:border 0.2s;color-scheme:dark;"
+                onfocus="this.style.borderColor='var(--accent)'"
+                onblur="this.style.borderColor='var(--border2)'"
+                onchange="previewPerfil()">
+            </div>
+
+            <button class="btn btn-primary" onclick="guardarPerfil()" style="margin-top:4px;">
+              Guardar perfil
+            </button>
+          </div>
+        </div>
+
+        <!-- Vista previa del saludo -->
+        <div class="card" style="background:linear-gradient(135deg,var(--card),var(--card2));border-color:var(--border2);">
+          <div class="card-label">Vista previa del saludo</div>
+          <div style="margin-top:12px;background:var(--bg3);border-radius:10px;padding:16px;">
+            <div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:6px;">PANEL DE CONTROL</div>
+            <div id="perfil-preview-greeting" style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);">
+              Buenos días, <span style="color:var(--accent)">Tu nombre</span> 👋
+            </div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px;">Empieza el día con energía. Tu hogar inteligente está listo.</div>
+          </div>
+        </div>
+
+        <!-- Próximo cumpleaños -->
+        <div class="card" id="perfil-proximo-card" style="display:none;">
+          <div class="card-label">🎂 Próximo Cumpleaños</div>
+          <div id="perfil-proximo-texto" style="font-size:14px;color:var(--text);margin-top:10px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer institucional -->
+  <div style="text-align:center;padding:24px 0 12px;margin-top:12px;border-top:1px solid var(--border);">
+    <div style="font-size:11px;color:var(--text3);letter-spacing:0.5px;">
+      Desarrollado por <strong style="color:var(--text2);">Pamela Canseco</strong>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.5px;">
+      Instituto Politécnico Nacional · ESIME Culhuacán
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════
+// ── CREDENCIALES ──────────────────────────────────────────
+const SP_CLIENT_ID  = '6f85d19e83bb47ac95beb6d94364eff3';
+// URL del backend — se detecta automáticamente
+// En Render: https://mi-casa-XXXX.onrender.com
+// En local:  http://127.0.0.1:8888
+const BACKEND_URL = (() => {
+  const h = window.location.hostname;
+  const p = window.location.port;
+  const proto = window.location.protocol;
+  // Si estamos en el mismo servidor que sirve el frontend → usar misma URL base
+  if (h !== 'localhost' && h !== '127.0.0.1') {
+    return `${proto}//${h}`;          // Render: misma URL sin puerto
+  }
+  return `http://127.0.0.1:${p||8888}`;  // Local
+})();
+let cfg = {
+  owmKey:          'f1cbe38d826874ebd7f7e85bd0242060',
+  sonoffIp:        '',
+  lightProtocol:   localStorage.getItem('light_protocol')  || 'sonoff',
+  tuyaDeviceId:    localStorage.getItem('tuya_device_id')  || '',
+  tuyaLocalKey:    localStorage.getItem('tuya_local_key')  || '',
+  spClientId:      SP_CLIENT_ID,
+  spClientSecret:  '4f52890e442848249fc3524fd8ac271c',
+  spToken:         '',
+  spCodeVerifier:  '',
+  newsApiKey:      localStorage.getItem('news_api_key') || '',
+};
+
+function toggleLightProtocol(){
+  const proto = document.getElementById('light-protocol').value;
+  document.getElementById('sonoff-fields').style.display = proto==='sonoff' ? 'block' : 'none';
+  document.getElementById('tuya-fields').style.display    = proto==='tuya'   ? 'block' : 'none';
+}
+
+function saveConfig(){
+  const sonoff   = document.getElementById('sonoff-ip').value.trim();
+  const proto    = document.getElementById('light-protocol').value;
+  const tuyaDev  = document.getElementById('tuya-device-id').value.trim();
+  const tuyaKey  = document.getElementById('tuya-local-key').value.trim();
+
+  cfg.lightProtocol = proto;
+  localStorage.setItem('light_protocol', proto);
+
+  if(sonoff){
+    cfg.sonoffIp = sonoff;
+    const disp = document.getElementById('sonoff-ip-display');
+    if(disp) disp.textContent = sonoff;
+  }
+  if(tuyaDev){ cfg.tuyaDeviceId = tuyaDev; localStorage.setItem('tuya_device_id', tuyaDev); }
+  if(tuyaKey){ cfg.tuyaLocalKey = tuyaKey; localStorage.setItem('tuya_local_key', tuyaKey); }
+
+  const newsKey = document.getElementById('news-api-key').value.trim();
+  if(newsKey){
+    cfg.newsApiKey = newsKey;
+    localStorage.setItem('news_api_key', newsKey);
+    loadNews();
+  }
+
+  document.getElementById('configOverlay').style.display = 'none';
+  toast('✅','Configuración guardada');
+  updateLightDeviceLabel();
+}
+
+function updateLightDeviceLabel(){
+  const disp = document.getElementById('sonoff-ip-display');
+  if(!disp) return;
+  if(cfg.lightProtocol==='tuya'){
+    disp.textContent = cfg.tuyaDeviceId ? 'Tuya: '+cfg.tuyaDeviceId.slice(0,10)+'…' : 'Tuya sin configurar';
+  } else {
+    disp.textContent = cfg.sonoffIp || '–';
+  }
+}
+
+// ════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════
+let toastTimer;
+function toast(icon, msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-icon').textContent=icon;
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════
+function navigate(id, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='weather') loadWeather();
+  if(id==='spotify') spGetCurrentTrack();
+  if(id==='perfil')  cargarPerfil();
+  showRoomBg(id);
+}
+
+// ════════════════════════════════════════
+//  FONDOS PERSONALIZADOS POR HABITACIÓN (IndexedDB)
+// ════════════════════════════════════════
+const ROOMS = {
+  home:    { label:'Panel Principal', defaults:[
+    'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=1200&q=70',
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=70',
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=70'
+  ]},
+  lights:  { label:'Iluminación', defaults:[
+    'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200&q=70',
+    'https://images.unsplash.com/photo-1517414294276-0a4406835a56?w=1200&q=70',
+    'https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=1200&q=70'
+  ]},
+  weather: { label:'Clima', defaults:[
+    'https://images.unsplash.com/photo-1601134467661-3d775b999c8b?w=1200&q=70',
+    'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=1200&q=70',
+    'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=1200&q=70'
+  ]},
+  spotify: { label:'Música', defaults:[
+    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=70',
+    'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=1200&q=70',
+    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&q=70'
+  ]},
+  perfil:  { label:'Perfil', defaults:[
+    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&q=70',
+    'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1200&q=70',
+    'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=70'
+  ]}
+};
+let currentBgRoom = 'home';
+let idbDB = null;
+
+function openBgDB(){
+  return new Promise((resolve,reject)=>{
+    if(idbDB) return resolve(idbDB);
+    const req = indexedDB.open('miCasaBackgrounds', 1);
+    req.onupgradeneeded = e => { e.target.result.createObjectStore('bgs'); };
+    req.onsuccess = e => { idbDB = e.target.result; resolve(idbDB); };
+    req.onerror = e => reject(e);
+  });
+}
+async function idbSet(key, value){
+  const db = await openBgDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('bgs','readwrite');
+    tx.objectStore('bgs').put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+async function idbGet(key){
+  const db = await openBgDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('bgs','readonly');
+    const req = tx.objectStore('bgs').get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = e => reject(e);
+  });
+}
+async function idbDelete(key){
+  const db = await openBgDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('bgs','readwrite');
+    tx.objectStore('bgs').delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+
+async function applyRoomBackground(room){
+  const layer = document.getElementById('room-bg-'+room);
+  if(!layer) return;
+  const custom = await idbGet('custom_'+room);
+  if(custom){
+    layer.style.backgroundImage = `url(${custom})`;
+    return;
+  }
+  const savedDefault = localStorage.getItem('bg_default_'+room) || (ROOMS[room] ? ROOMS[room].defaults[0] : '');
+  if(savedDefault) layer.style.backgroundImage = `url(${savedDefault})`;
+}
+
+function showRoomBg(room){
+  document.querySelectorAll('.room-bg-layer').forEach(l=>l.classList.remove('active'));
+  const layer = document.getElementById('room-bg-'+room);
+  if(layer) layer.classList.add('active');
+  currentBgRoom = room;
+  const label = document.getElementById('bg-panel-room');
+  if(label && ROOMS[room]) label.textContent = ROOMS[room].label;
+  renderBgThumbs();
+}
+
+function toggleBgPanel(){
+  document.getElementById('bg-panel').classList.toggle('show');
+  renderBgThumbs();
+}
+
+async function renderBgThumbs(){
+  const grid = document.getElementById('bg-thumb-grid');
+  if(!grid || !ROOMS[currentBgRoom]) return;
+  const custom = await idbGet('custom_'+currentBgRoom);
+  const currentUrl = custom || localStorage.getItem('bg_default_'+currentBgRoom) || ROOMS[currentBgRoom].defaults[0];
+  grid.innerHTML = ROOMS[currentBgRoom].defaults.map(url => `
+    <div class="bg-thumb ${!custom && url===currentUrl ? 'active':''}" style="background-image:url(${url})" onclick="selectDefaultBg('${url}')"></div>
+  `).join('');
+  if(custom){
+    grid.innerHTML += `<div class="bg-thumb active" style="background-image:url(${custom})" title="Tu imagen personalizada"></div>`;
+  }
+}
+
+function selectDefaultBg(url){
+  localStorage.setItem('bg_default_'+currentBgRoom, url);
+  idbDelete('custom_'+currentBgRoom);
+  applyRoomBackground(currentBgRoom);
+  renderBgThumbs();
+}
+
+function uploadCustomBg(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  if(file.size > 6*1024*1024){ toast('⚠️','Imagen muy pesada (máx. 6MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = async () => {
+    await idbSet('custom_'+currentBgRoom, reader.result);
+    applyRoomBackground(currentBgRoom);
+    renderBgThumbs();
+    toast('🖼️','Fondo personalizado aplicado');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function clearRoomBg(){
+  await idbDelete('custom_'+currentBgRoom);
+  localStorage.removeItem('bg_default_'+currentBgRoom);
+  applyRoomBackground(currentBgRoom);
+  renderBgThumbs();
+  toast('🗑️','Fondo restablecido');
+}
+
+async function initBackgrounds(){
+  for(const room in ROOMS){ await applyRoomBackground(room); }
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('bg-panel');
+  if(panel && panel.classList.contains('show') && !panel.contains(e.target) && !e.target.closest('.bg-picker-btn')){
+    panel.classList.remove('show');
+  }
+});
+
+// ════════════════════════════════════════
+//  WIDGETS REDIMENSIONABLES (persisten tamaño por usuario)
+// ════════════════════════════════════════
+function initResizableWidgets(){
+  document.querySelectorAll('.widget-resizable').forEach(w => {
+    const saved = localStorage.getItem('widget_size_'+w.id);
+    if(saved){
+      try{
+        const {width,height} = JSON.parse(saved);
+        if(width) w.style.width = width;
+        if(height) w.style.height = height;
+      }catch(e){}
+    }
+    let resizeTimer;
+    new ResizeObserver(() => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        localStorage.setItem('widget_size_'+w.id, JSON.stringify({width:w.style.width||w.offsetWidth+'px', height:w.style.height||w.offsetHeight+'px'}));
+      }, 400);
+    }).observe(w);
+  });
+}
+function resetWidgetSize(id){
+  const w = document.getElementById(id);
+  if(!w) return;
+  w.style.width = '';
+  w.style.height = '';
+  localStorage.removeItem('widget_size_'+id);
+  toast('↺','Tamaño restablecido');
+}
+
+// ════════════════════════════════════════
+//  NOTICIAS (NewsAPI)
+// ════════════════════════════════════════
+async function loadNews(){
+  const list = document.getElementById('news-list');
+  if(!list) return;
+  if(!cfg.newsApiKey){
+    list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px;">
+      Configura tu API key de NewsAPI en ⚙️ para ver noticias aquí.</div>`;
+    return;
+  }
+  list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Cargando noticias…</div>`;
+  try{
+    const url = `https://newsapi.org/v2/top-headlines?country=mx&pageSize=6&apiKey=${cfg.newsApiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status !== 'ok') throw new Error(data.message || 'Error de NewsAPI');
+    if(!data.articles || !data.articles.length){
+      list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px;">Sin noticias disponibles.</div>`;
+      return;
+    }
+    list.innerHTML = data.articles.map(a => `
+      <a class="news-item" href="${a.url}" target="_blank" rel="noopener">
+        <div class="news-thumb" style="${a.urlToImage ? `background-image:url(${a.urlToImage})` : ''}">${a.urlToImage ? '' : '📰'}</div>
+        <div style="min-width:0;">
+          <div class="news-headline">${a.title || 'Sin título'}</div>
+          <div class="news-meta">${a.source?.name || 'Fuente desconocida'}</div>
+        </div>
+      </a>
+    `).join('');
+  }catch(e){
+    console.error(e);
+    // NewsAPI (plan gratuito) solo permite solicitudes desde localhost por CORS.
+    // En producción (Render.com) esta llamada debe pasar por un proxy en server.py.
+    list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px;">
+      No se pudieron cargar noticias. Si estás en producción, NewsAPI (plan gratuito) requiere un proxy en el backend — dime si quieres que lo agreguemos a server.py.</div>`;
+  }
+}
+
+// ════════════════════════════════════════
+//  CLOCK & GREETING
+// ════════════════════════════════════════
+function updateClock(){
+  const now = new Date();
+  const h=now.getHours(), m=now.getMinutes(), s=now.getSeconds();
+  document.getElementById('live-clock').textContent =
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  document.getElementById('home-date').textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+
+  let greeting, icon, sub;
+  if(h>=5 && h<12){ greeting='Buenos días'; icon='☀️'; sub='Empieza el día con energía. Tu hogar inteligente está listo.'; }
+  else if(h>=12 && h<19){ greeting='Buenas tardes'; icon='🌅'; sub='La tarde está avanzando. Revisa el estado de tu hogar.'; }
+  else { greeting='Buenas noches'; icon='🌙'; sub='Es momento de descansar. Ajusta la iluminación y la música.'; }
+
+  const userName = getNombre();
+  const isBday   = esCumpleanios();
+  const greetMsg = isBday
+    ? `🎂 ¡Feliz cumpleaños, <span class="name">${userName}</span>! 🎉`
+    : `${greeting}, <span class="name">${userName}</span> 👋`;
+  document.getElementById('greeting-text').innerHTML = greetMsg;
+  if(isBday) document.getElementById('greeting-sub').textContent =
+    '🎉 ¡Hoy es tu cumpleaños! Que tengas un día increíble.';
+  document.getElementById('greeting-sub').textContent = sub;
+  document.getElementById('greeting-icon').textContent = icon;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ════════════════════════════════════════
+//  COLOR WHEEL
+// ════════════════════════════════════════
+let selectedColor = '#ffd264';
+function drawColorWheel(){
+  const canvas=document.getElementById('colorWheel');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const cx=100,cy=100,r=98;
+  for(let angle=0;angle<360;angle++){
+    const a1=((angle-1)*Math.PI/180), a2=((angle+1)*Math.PI/180);
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    const h=`hsl(${angle},100%,50%)`;
+    g.addColorStop(0,'white'); g.addColorStop(0.5,h); g.addColorStop(1,'black');
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,a1,a2); ctx.closePath();
+    ctx.fillStyle=g; ctx.fill();
+  }
+  canvas.onclick=function(e){
+    const rect=canvas.getBoundingClientRect();
+    const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    const data=ctx.getImageData(Math.round(x*(200/rect.width)),Math.round(y*(200/rect.height)),1,1).data;
+    const hex='#'+[data[0],data[1],data[2]].map(v=>v.toString(16).padStart(2,'0')).join('');
+    selectedColor=hex;
+    document.getElementById('selectedColorBox').style.background=hex;
+    document.getElementById('selectedColorHex').textContent=hex.toUpperCase();
+  };
+}
+
+// ════════════════════════════════════════
+//  LIGHTS — SONOFF B05
+// ════════════════════════════════════════
+let lightOn = true;
+const presetColors = [
+  {name:'Cálido',hex:'#ffd264'},{name:'Blanco',hex:'#ffffff'},
+  {name:'Frío',hex:'#c8e0ff'},{name:'Rojo',hex:'#ff4444'},
+  {name:'Verde',hex:'#44ff88'},{name:'Azul',hex:'#4488ff'},
+  {name:'Morado',hex:'#aa44ff'},{name:'Rosa',hex:'#ff44cc'},
+  {name:'Naranja',hex:'#ff8844'},{name:'Cyan',hex:'#44ffee'},
+  {name:'Amarillo',hex:'#ffee00'},{name:'Coral',hex:'#ff6b6b'},
+];
+
+function buildSwatches(){
+  const grid=document.getElementById('color-swatches');
+  if(!grid) return;
+  grid.innerHTML='';
+  presetColors.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='swatch'+(i===0?' active':'');
+    d.style.background=c.hex;
+    d.title=c.name;
+    d.onclick=()=>{
+      document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+      d.classList.add('active');
+      applyColor(c.hex);
+    };
+    grid.appendChild(d);
+  });
+}
+
+function applyColor(hex){
+  selectedColor=hex;
+  document.getElementById('selectedColorBox').style.background=hex;
+  document.getElementById('selectedColorHex').textContent=hex.toUpperCase();
+  if(lightOn) {
+    document.getElementById('bulb-inner').style.filter=`drop-shadow(0 0 8px ${hex})`;
+    document.getElementById('bulb-preview').style.setProperty('--bulb-glow',hexToRgba(hex,0.4));
+    document.getElementById('bulb-inner').parentElement.style.cssText+=`background:${hex};`;
+  }
+  sendSonoffColor(hex);
+  document.getElementById('home-bulb-inner').style.background=hex;
+}
+
+function hexToRgba(hex,a){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function applyColorFromWheel(){ applyColor(selectedColor); toast('🎨',`Color aplicado: ${selectedColor.toUpperCase()}`); }
+
+function toggleLight(){
+  lightOn=!lightOn;
+  const toggle=document.getElementById('light-toggle');
+  const badge=document.getElementById('light-badge');
+  const bulb=document.getElementById('bulb-preview');
+  toggle.classList.toggle('on',lightOn);
+  if(lightOn){
+    badge.className='badge badge-green';
+    badge.innerHTML='<span class="badge-dot"></span>Encendido';
+    bulb.classList.add('on');
+  } else {
+    badge.className='badge badge-red';
+    badge.innerHTML='<span class="badge-dot"></span>Apagado';
+    bulb.classList.remove('on');
+  }
+  document.getElementById('home-toggle').classList.toggle('on',lightOn);
+  document.getElementById('home-light-status').textContent=lightOn?'ON':'OFF';
+  document.getElementById('home-light-status').style.color=lightOn?'var(--accent)':'var(--text3)';
+  sendSonoffPower(lightOn?'on':'off');
+}
+function toggleLightHome(){
+  toggleLight();
+  navigate('home',null);
+}
+
+function updateBrightness(v){
+  document.getElementById('bri-val').textContent=v+'%';
+  document.getElementById('home-bri-val').textContent=v+'%';
+  document.getElementById('sonoff-bri-display').textContent=v+'%';
+  document.getElementById('bri-slider').style.setProperty('--pct',v+'%');
+  document.getElementById('home-bri-slider').style.setProperty('--pct',v+'%');
+  sendSonoffBrightness(parseInt(v));
+}
+function updateHomeBrightness(v){
+  document.getElementById('home-bri-val').textContent=v+'%';
+  document.getElementById('home-bri-slider').style.setProperty('--pct',v+'%');
+  if(document.getElementById('bri-slider')){
+    document.getElementById('bri-slider').value=v;
+    updateBrightness(v);
+  }
+}
+
+function updateColorTemp(v){
+  const pct=((v-2700)/(6500-2700)*100).toFixed(0);
+  document.getElementById('ct-slider').style.setProperty('--pct',pct+'%');
+  let label='Blanco cálido';
+  if(v>5000) label='Luz día';
+  else if(v>4000) label='Blanco neutro';
+  else if(v>3200) label='Blanco suave';
+  document.getElementById('ct-val').textContent=label;
+  sendSonoffColorTemp(parseInt(v));
+}
+
+function sendLightCmd(cmd){
+  if(cmd==='on'&&!lightOn) toggleLight();
+  if(cmd==='off'&&lightOn) toggleLight();
+  if(cmd==='night'){ applyColor('#ff6600'); updateBrightness(20); document.getElementById('bri-slider').value=20; }
+  toast('💡',`Comando enviado: ${cmd}`);
+}
+
+const scenes = {
+  relax: {color:'#ff8844',bri:40,label:'Relajación'},
+  focus: {color:'#c8e0ff',bri:90,label:'Trabajo'},
+  cinema: {color:'#220011',bri:10,label:'Cine'},
+  party: {color:'#aa44ff',bri:100,label:'Fiesta'},
+  reading: {color:'#fff3c0',bri:75,label:'Lectura'},
+  wake: {color:'#fffbe6',bri:80,label:'Despertar'},
+};
+function applyScene(s){
+  const sc=scenes[s];
+  applyColor(sc.color);
+  updateBrightness(sc.bri);
+  document.getElementById('bri-slider').value=sc.bri;
+  if(!lightOn) toggleLight();
+  toast('✨',`Escena aplicada: ${sc.label}`);
+}
+
+// ════════════════════════════════════════
+//  CONTROL DE FOCO — Sonoff (LAN directo) o Tuya (vía backend)
+// ════════════════════════════════════════
+// Tuya requiere cifrado AES de la sesión local, por eso esas llamadas
+// se hacen a través del backend Python (server.py) en Render, que
+// actúa como proxy seguro hacia la Tuya Cloud API usando:
+//   Client ID / Client Secret  → autenticación con Tuya Cloud
+//   Device ID / Local Key      → identifican y cifran el comando hacia tu foco específico
+
+async function _tuyaCommand(commands){
+  try {
+    const r = await fetch(`${BACKEND_URL}/tuya/command`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        device_id: cfg.tuyaDeviceId,
+        local_key: cfg.tuyaLocalKey,
+        commands:  commands
+      })
+    });
+    if(!r.ok){
+      const err = await r.json().catch(()=>({}));
+      toast('⚠️','Tuya: '+(err.error||'no se pudo conectar al foco'));
+    }
+  } catch(e){
+    toast('⚠️','No se pudo conectar con el backend para el foco Tuya');
+  }
+}
+
+async function sendSonoffPower(state){
+  if(cfg.lightProtocol==='tuya'){
+    return _tuyaCommand([{ code:'switch_led', value: !!state }]);
+  }
+  try {
+    await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/switch`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({deviceid:'',data:{switch:state}})
+    });
+  } catch(e){ console.warn('Sonoff no disponible:', e.message); }
+}
+async function sendSonoffBrightness(v){
+  if(cfg.lightProtocol==='tuya'){
+    // Tuya usa escala 10-1000 para brillo en la mayoría de focos
+    const tuyaVal = Math.round(10 + (v/100)*990);
+    return _tuyaCommand([{ code:'bright_value_v2', value: tuyaVal }]);
+  }
+  try {
+    await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/dimmable`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({deviceid:'',data:{brightness:v}})
+    });
+  } catch(e){}
+}
+async function sendSonoffColor(hex){
+  if(cfg.lightProtocol==='tuya'){
+    const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    // Tuya espera HSV en hex string: hhhh ssss vvvv (4 chars cada uno)
+    const {h,s,v} = _rgbToHsv(r,g,b);
+    const hsvHex = h.toString(16).padStart(4,'0') + s.toString(16).padStart(4,'0') + v.toString(16).padStart(4,'0');
+    return _tuyaCommand([
+      { code:'work_mode', value:'colour' },
+      { code:'colour_data_v2', value: hsvHex }
+    ]);
+  }
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  try {
+    await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/color`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({deviceid:'',data:{colorR:r,colorG:g,colorB:b,light_type:1,ltype:'color'}})
+    });
+  } catch(e){}
+}
+async function sendSonoffColorTemp(mireds){
+  if(cfg.lightProtocol==='tuya'){
+    const kelvin = Math.round(1000000/mireds);
+    // Mapear 2700K-6500K a escala Tuya 0-1000
+    const tuyaTemp = Math.round(((kelvin-2700)/(6500-2700))*1000);
+    return _tuyaCommand([
+      { code:'work_mode', value:'white' },
+      { code:'temp_value_v2', value: Math.max(0,Math.min(1000,tuyaTemp)) }
+    ]);
+  }
+  try {
+    await fetch(`http://${cfg.sonoffIp}:8081/zeroconf/colortemp`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({deviceid:'',data:{colorTemp:Math.round(1000000/mireds)}})
+    });
+  } catch(e){}
+}
+
+// Conversión RGB → HSV en escala Tuya (H:0-360, S:0-1000, V:0-1000)
+function _rgbToHsv(r,g,b){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b), d=max-min;
+  let h=0;
+  if(d!==0){
+    if(max===r) h=((g-b)/d)%6;
+    else if(max===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h = Math.round(h*60);
+    if(h<0) h+=360;
+  }
+  const s = max===0 ? 0 : Math.round((d/max)*1000);
+  const v = Math.round(max*1000);
+  return {h,s,v};
+}
+
+// ════════════════════════════════════════
+//  WEATHER — OpenWeatherMap
+// ════════════════════════════════════════
+const wxIcons = {
+  '01d':'☀️','01n':'🌙','02d':'⛅','02n':'☁️','03d':'☁️','03n':'☁️',
+  '04d':'☁️','04n':'☁️','09d':'🌧','09n':'🌧','10d':'🌦','10n':'🌧',
+  '11d':'⛈','11n':'⛈','13d':'❄️','13n':'❄️','50d':'🌫','50n':'🌫'
+};
+const daysES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+async function loadWeather(){
+  try {
+    const pos = await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000}));
+    const {latitude:lat,longitude:lon}=pos.coords;
+    const [cur,fcast]=await Promise.all([
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${cfg.owmKey}&units=metric&lang=es`).then(r=>r.json()),
+      fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${cfg.owmKey}&units=metric&lang=es`).then(r=>r.json())
+    ]);
+    renderWeather(cur);
+    renderForecast(fcast);
+    document.getElementById('wx-updated').textContent = 'Actualizado: '+new Date().toLocaleTimeString();
+    toast('🌤','Clima actualizado');
+  } catch(e){
+    console.error(e);
+    toast('⚠️','No se pudo cargar el clima');
+    loadDemoWeather();
+  }
+}
+
+function renderWeather(d){
+  const icon = wxIcons[d.weather[0].icon]||'🌤';
+  const city = `${d.name}, ${d.sys.country}`;
+  const temp = Math.round(d.main.temp);
+  const feel = Math.round(d.main.feels_like);
+  const hum = d.main.humidity;
+  const wind = Math.round(d.wind.speed*3.6);
+  const vis = d.visibility?(d.visibility/1000).toFixed(1):'–';
+  const pres = d.main.pressure;
+  const desc = d.weather[0].description.charAt(0).toUpperCase()+d.weather[0].description.slice(1);
+  const sr = new Date(d.sys.sunrise*1000).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const ss = new Date(d.sys.sunset*1000).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+
+  ['wx-full-city','home-wx-city'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=city;});
+  document.getElementById('wx-temp').textContent=temp;
+  document.getElementById('wx-feel').textContent=feel+'°C';
+  document.getElementById('wx-hum').textContent=hum+'%';
+  document.getElementById('wx-hum2').textContent=hum+'%';
+  document.getElementById('wx-wind').textContent=wind+' km/h';
+  document.getElementById('wx-vis').textContent=vis+' km';
+  document.getElementById('wx-uv').textContent='–';
+  document.getElementById('wx-pressure').textContent=pres+' hPa';
+  document.getElementById('wx-desc').textContent=desc;
+  document.getElementById('wx-icon-big').textContent=icon;
+  document.getElementById('wx-sunrise').textContent=sr;
+  document.getElementById('wx-sunset').textContent=ss;
+  document.getElementById('wx-clouds').textContent=(d.clouds?.all||0)+'%';
+  const cl=document.getElementById('wx-cloud-bar');
+  cl.value=d.clouds?.all||0; cl.style.setProperty('--pct',(d.clouds?.all||0)+'%');
+  const hl=document.getElementById('wx-hum-bar');
+  hl.value=hum; hl.style.setProperty('--pct',hum+'%');
+
+  document.getElementById('home-wx-temp').textContent=temp+'°';
+  document.getElementById('home-wx-icon').textContent=icon;
+  document.getElementById('home-wx-desc').textContent=desc;
+  document.getElementById('home-temp').textContent=temp+'°C';
+  document.getElementById('home-temp').style.color='var(--teal)';
+}
+
+function renderForecast(d){
+  const daily={};
+  d.list.forEach(item=>{
+    const date=item.dt_txt.split(' ')[0];
+    if(!daily[date]) daily[date]={min:item.main.temp_min,max:item.main.temp_max,icon:item.weather[0].icon};
+    else {
+      if(item.main.temp_max>daily[date].max) daily[date].max=item.main.temp_max;
+      if(item.main.temp_min<daily[date].min) daily[date].min=item.main.temp_min;
+    }
+  });
+  const keys=Object.keys(daily).slice(0,5);
+  const row=document.getElementById('forecast-row');
+  row.innerHTML=keys.map(k=>{
+    const d2=daily[k]; const dt=new Date(k);
+    return `<div class="forecast-item">
+      <div class="forecast-day">${daysES[dt.getDay()]}</div>
+      <div class="forecast-icon">${wxIcons[d2.icon]||'🌤'}</div>
+      <div class="forecast-temps">
+        <span class="forecast-max">${Math.round(d2.max)}°</span>
+        <span class="forecast-min">${Math.round(d2.min)}°</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadDemoWeather(){
+  const demo={name:'Ciudad de México',sys:{country:'MX',sunrise:1700000000,sunset:1700043600},
+    main:{temp:22,feels_like:20,humidity:65,pressure:1013},
+    wind:{speed:3.5},visibility:10000,
+    weather:[{icon:'02d',description:'Parcialmente nublado'}],
+    clouds:{all:40}};
+  renderWeather(demo);
+  const fc={list:[]};
+  const icons=['01d','02d','10d','03d','01d'];
+  for(let i=0;i<5;i++){
+    const dt=new Date(); dt.setDate(dt.getDate()+i);
+    fc.list.push({
+      dt_txt:`${dt.toISOString().split('T')[0]} 12:00:00`,
+      main:{temp_min:16+i,temp_max:24+i},
+      weather:[{icon:icons[i]}]
+    });
+  }
+  renderForecast(fc);
+  document.getElementById('wx-updated').textContent='Datos demo';
+}
+
+// ════════════════════════════════════════
+// ════════════════════════════════════════
+//  SPOTIFY — Web Playback SDK (reproduce dentro de la app)
+// ════════════════════════════════════════
+let spPlaying=false, spShuffle=false, spRepeat=false, spVolume=70;
+let spProgressInterval=null, spElapsed=0, spTotal=0;
+let spPlayer=null, spDeviceId=null;
+
+const SP_CLIENT_ID_KEY = '6f85d19e83bb47ac95beb6d94364eff3';
+const SP_SCOPES_LIST = [
+  'streaming','user-read-email','user-read-private',
+  'user-read-playback-state','user-modify-playback-state',
+  'user-read-currently-playing','playlist-read-private'
+].join(' ');
+
+// ── Login via Authorization Code + PKCE (sin backend) ──────────
+// Spotify deprecated Implicit Grant en 2024 — PKCE es el estándar actual
+
+function _b64url(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+async function _pkceVerifier(){
+  const arr = new Uint8Array(64);
+  crypto.getRandomValues(arr);
+  return _b64url(arr);
+}
+async function _pkceChallenge(verifier){
+  const enc    = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', enc);
+  return _b64url(digest);
+}
+
+async function spotifyLogin(){
+  const verifier  = await _pkceVerifier();
+  const challenge = await _pkceChallenge(verifier);
+  sessionStorage.setItem('sp_verifier', verifier);
+
+  const redirect = window.location.origin + window.location.pathname;
+  sessionStorage.setItem('sp_redirect', redirect);
+
+  const url = 'https://accounts.spotify.com/authorize'
+    + '?client_id='             + SP_CLIENT_ID_KEY
+    + '&response_type=code'
+    + '&redirect_uri='          + encodeURIComponent(redirect)
+    + '&scope='                 + encodeURIComponent(SP_SCOPES_LIST)
+    + '&code_challenge_method=S256'
+    + '&code_challenge='        + challenge
+    + '&show_dialog=false';
+  window.location.href = url;
+}
+
+async function _exchangeCode(code){
+  const verifier  = sessionStorage.getItem('sp_verifier');
+  const redirect  = sessionStorage.getItem('sp_redirect');
+  if(!verifier){ toast('⚠️','Sesión expirada, intenta de nuevo'); return; }
+
+  const body = new URLSearchParams({
+    grant_type:    'authorization_code',
+    code,
+    redirect_uri:  redirect,
+    client_id:     SP_CLIENT_ID_KEY,
+    code_verifier: verifier,
+  });
+
+  try {
+    const r = await fetch('https://accounts.spotify.com/api/token',{
+      method:  'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body:    body.toString()
+    });
+    const d = await r.json();
+    if(d.access_token){
+      cfg.spToken = d.access_token;
+      sessionStorage.setItem('sp_token',   d.access_token);
+      sessionStorage.setItem('sp_expiry',  Date.now()+(d.expires_in-60)*1000);
+      if(d.refresh_token)
+        sessionStorage.setItem('sp_refresh', d.refresh_token);
+      sessionStorage.removeItem('sp_verifier');
+      _initSpotifySDK();
+    } else {
+      console.error('Token error:', d);
+      toast('❌','Error Spotify: '+(d.error_description||d.error||'desconocido'));
+    }
+  } catch(e){
+    toast('❌','Error de red al conectar Spotify');
+  }
+}
+
+async function _refreshSpToken(){
+  const refresh = sessionStorage.getItem('sp_refresh');
+  if(!refresh) return false;
+  const body = new URLSearchParams({
+    grant_type:    'refresh_token',
+    refresh_token:  refresh,
+    client_id:      SP_CLIENT_ID_KEY,
+  });
+  try {
+    const r = await fetch('https://accounts.spotify.com/api/token',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body: body.toString()
+    });
+    const d = await r.json();
+    if(d.access_token){
+      cfg.spToken = d.access_token;
+      sessionStorage.setItem('sp_token',  d.access_token);
+      sessionStorage.setItem('sp_expiry', Date.now()+(d.expires_in-60)*1000);
+      if(d.refresh_token) sessionStorage.setItem('sp_refresh', d.refresh_token);
+      return true;
+    }
+  } catch(e){ console.error('Refresh error:',e); }
+  return false;
+}
+
+function spotifyAuth(){ spotifyLogin(); }
+
+// ── Detectar code/token al volver de Spotify ────────────────
+async function checkSpotifyToken(){
+  // 1. ¿Viene un ?code= en la URL? (PKCE callback)
+  const params = new URLSearchParams(window.location.search);
+  const code   = params.get('code');
+  const error  = params.get('error');
+
+  if(error){
+    toast('❌','Spotify: '+error);
+    window.history.replaceState(null, null, window.location.pathname);
+    return;
+  }
+
+  if(code){
+    // Limpiar URL antes de intercambiar
+    window.history.replaceState(null, null, window.location.pathname);
+    toast('🔄','Conectando con Spotify...');
+    await _exchangeCode(code);
+    return;
+  }
+
+  // 2. ¿Hay token válido guardado?
+  const saved   = sessionStorage.getItem('sp_token');
+  const expiry  = sessionStorage.getItem('sp_expiry');
+  const refresh = sessionStorage.getItem('sp_refresh');
+
+  if(saved && expiry && Date.now() < parseInt(expiry)){
+    cfg.spToken = saved;
+    _initSpotifySDK();
+    return;
+  }
+
+  // 3. Intentar renovar con refresh_token
+  if(refresh){
+    const ok = await _refreshSpToken();
+    if(ok){ _initSpotifySDK(); return; }
+  }
+}
+
+// ── Inicializar Web Playback SDK ──────────────────────────────
+function _initSpotifySDK(){
+  if(!cfg.spToken) return;
+
+  const doInit = () => {
+    spPlayer = new Spotify.Player({
+      name: 'Mi Casa Inteligente',
+      getOAuthToken: cb => cb(cfg.spToken),
+      volume: spVolume / 100
+    });
+
+    spPlayer.addListener('ready', ({ device_id }) => {
+      spDeviceId = device_id;
+      activeDeviceId = device_id;
+      _onSpotifyReady();
+      spFetch('/me/player','PUT',{device_ids:[device_id], play:false}).catch(()=>{});
+    });
+
+    spPlayer.addListener('player_state_changed', state => {
+      if(!state) return;
+      const t = state.track_window.current_track;
+      if(!t) return;
+      const artistStr = t.artists.map(a=>a.name).join(', ');
+      ['sp-track-name','home-sp-track'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=t.name;});
+      const sa=document.getElementById('sp-track-artist');if(sa)sa.textContent=artistStr;
+      const sb=document.getElementById('home-sp-artist');if(sb)sb.textContent=artistStr;
+      const sc=document.getElementById('sp-track-album');if(sc)sc.textContent=t.album.name;
+      const ms=document.getElementById('home-music-status');if(ms)ms.textContent=t.name.length>12?t.name.slice(0,12)+'…':t.name;
+      const img=t.album.images?.[0]?.url;
+      if(img){
+        const a1=document.getElementById('sp-art-placeholder');if(a1)a1.innerHTML=`<img src="${img}" style="width:100%;height:100%;object-fit:cover;">`;
+        const a2=document.getElementById('home-sp-art');if(a2)a2.innerHTML=`<img src="${img}" style="width:100%;height:100%;object-fit:cover;">`;
+      }
+      spPlaying = !state.paused;
+      spElapsed = Math.round(state.position/1000);
+      spTotal   = Math.round(state.duration/1000);
+      updatePlayBtn();
+      updateProgress();
+      if(spPlaying) startProgressTimer(); else clearInterval(spProgressInterval);
+    });
+
+    spPlayer.addListener('initialization_error', ({message})=>toast('❌','SDK: '+message));
+    spPlayer.addListener('authentication_error',  ()=>{
+      toast('❌','Sesión expirada — vuelve a iniciar sesión');
+      sessionStorage.removeItem('sp_token');
+      const p=document.getElementById('sp-auth-pending');if(p)p.style.display='block';
+      const r=document.getElementById('sp-auth-ready');if(r)r.style.display='none';
+    });
+    spPlayer.addListener('account_error', ()=>toast('⚠️','Necesitas Spotify Premium para el reproductor integrado'));
+
+    spPlayer.connect();
+  };
+
+  if(window.Spotify && window.Spotify.Player) doInit();
+  else window.onSpotifyWebPlaybackSDKReady = doInit;
+}
+
+function _onSpotifyReady(){
+  const p=document.getElementById('sp-auth-pending');if(p)p.style.display='none';
+  const r=document.getElementById('sp-auth-ready');if(r)r.style.display='block';
+  toast('🎵','Spotify listo — reproduciendo en Mi Casa');
+  spGetCurrentTrack();
+}
+
+async function spFetch(path, method='GET', body=null){
+  if(!cfg.spToken) return null;
+  const opts={method,headers:{Authorization:`Bearer ${cfg.spToken}`,'Content-Type':'application/json'}};
+  if(body) opts.body=JSON.stringify(body);
+  try {
+    const r=await fetch(`https://api.spotify.com/v1${path}`,opts);
+    if(r.status===204) return {};
+    if(!r.ok) return null;
+    return await r.json();
+  } catch(e){ return null; }
+}
+
+async function spGetCurrentTrack(){
+  const d=await spFetch('/me/player/currently-playing');
+  if(d && d.item){
+    renderTrack(d);
+    spPlaying=d.is_playing;
+    updatePlayBtn();
+  }
+  await spGetQueue();
+}
+
+function renderTrack(d){
+  const t=d.item;
+  const name=t.name;
+  const artist=t.artists.map(a=>a.name).join(', ');
+  const album=t.album?.name||'';
+  const art=t.album?.images?.[0]?.url||null;
+  spElapsed=Math.round(d.progress_ms/1000);
+  spTotal=Math.round(t.duration_ms/1000);
+
+  ['sp-track-name'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=name;});
+  ['sp-track-artist'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=artist;});
+  document.getElementById('sp-track-album').textContent=album;
+  document.getElementById('home-sp-track').textContent=name;
+  document.getElementById('home-sp-artist').textContent=artist;
+  document.getElementById('home-music-status').textContent=name.length>12?name.slice(0,12)+'…':name;
+
+  if(art){
+    document.getElementById('sp-art-placeholder').innerHTML=`<img src="${art}" alt="cover">`;
+    document.getElementById('home-sp-art').innerHTML=`<img src="${art}" style="width:100%;height:100%;object-fit:cover;">`;
+  }
+  updateProgress();
+  startProgressTimer();
+}
+
+function fmtTime(s){ return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}` }
+
+function updateProgress(){
+  if(!spTotal) return;
+  const pct=Math.min(100,(spElapsed/spTotal)*100);
+  document.getElementById('sp-bar-fill').style.width=pct+'%';
+  document.getElementById('sp-thumb').style.left=pct+'%';
+  document.getElementById('sp-elapsed').textContent=fmtTime(spElapsed);
+  document.getElementById('sp-duration').textContent=fmtTime(spTotal);
+}
+
+function startProgressTimer(){
+  clearInterval(spProgressInterval);
+  if(spPlaying){
+    spProgressInterval=setInterval(()=>{
+      if(spElapsed<spTotal){ spElapsed++; updateProgress(); }
+      else clearInterval(spProgressInterval);
+    },1000);
+  }
+}
+
+function seekTrack(e){
+  const bar=document.getElementById('sp-bar-bg');
+  const pct=e.offsetX/bar.offsetWidth;
+  spElapsed=Math.round(pct*spTotal);
+  updateProgress();
+  if(cfg.spToken && !cfg.demoMode){
+    spFetch(`/me/player/seek?position_ms=${spElapsed*1000}`,'PUT');
+  }
+}
+
+async function spToggle(){
+  if(!cfg.spToken){ toast('⚠️','Conecta Spotify primero'); return; }
+  if(spPlayer){ if(spPlaying) await spPlayer.pause(); else await spPlayer.resume(); } else { const ep=spPlaying?'/me/player/pause':'/me/player/play'+(activeDeviceId?'?device_id='+activeDeviceId:''); await spFetch(ep,'PUT'); }
+  spPlaying=!spPlaying; updatePlayBtn(); startProgressTimer();
+  toast(spPlaying?'▶':'⏸', spPlaying?'Reproduciendo':'Pausado');
+}
+
+async function spNext(){
+  if(spPlayer) await spPlayer.nextTrack(); else await spFetch('/me/player/next','POST');
+  setTimeout(spGetCurrentTrack,500);
+  toast('⏭','Siguiente canción');
+}
+async function spPrev(){
+  if(spPlayer) await spPlayer.previousTrack(); else await spFetch('/me/player/previous','POST');
+  setTimeout(spGetCurrentTrack,500);
+  toast('⏮','Canción anterior');
+}
+
+function updatePlayBtn(){
+  const btns=['sp-play-btn','home-play-btn'];
+  btns.forEach(id=>{const b=document.getElementById(id);if(b)b.textContent=spPlaying?'⏸':'▶';});
+  const badge=document.getElementById('sp-status-badge');
+  if(badge){
+    badge.className=spPlaying?'badge badge-green':'badge badge-orange';
+    badge.innerHTML=`<span class="badge-dot"></span>${spPlaying?'Reproduciendo':'Pausado'}`;
+  }
+}
+
+async function spToggleShuffle(){
+  spShuffle=!spShuffle;
+  document.getElementById('sp-shuffle-btn').classList.toggle('active',spShuffle);
+  if(!cfg.demoMode && cfg.spToken) await spFetch(`/me/player/shuffle?state=${spShuffle}`,'PUT');
+  toast('🔀',spShuffle?'Aleatorio activado':'Aleatorio desactivado');
+}
+async function spToggleRepeat(){
+  spRepeat=!spRepeat;
+  document.getElementById('sp-repeat-btn').classList.toggle('active',spRepeat);
+  if(!cfg.demoMode && cfg.spToken) await spFetch(`/me/player/repeat?state=${spRepeat?'track':'off'}`,'PUT');
+  toast('🔁',spRepeat?'Repetir activado':'Repetir desactivado');
+}
+
+async function updateVolume(v){
+  spVolume=parseInt(v);
+  document.getElementById('sp-vol-val').textContent=v+'%';
+  document.getElementById('sp-vol-slider').style.setProperty('--pct',v+'%');
+  document.getElementById('vol-icon').textContent=v>50?'🔊':v>10?'🔉':'🔈';
+  if(spPlayer) spPlayer.setVolume(v/100); else if(cfg.spToken) await spFetch(`/me/player/volume?volume_percent=${v}`,'PUT');
+}
+
+async function spGetQueue(){
+  if(!cfg.spToken) return;
+
+  // Obtener canción actual y cola en paralelo
+  const [qData, playerData] = await Promise.all([
+    spFetch('/me/player/queue'),
+    spFetch('/me/player/currently-playing')
+  ]);
+
+  const list = document.getElementById('sp-queue-list');
+  const items = [];
+
+  // 1. Agregar canción actual marcada como "ahora"
+  const current = playerData?.item || qData?.currently_playing;
+  if(current){
+    items.push({...current, _current: true});
+  }
+
+  // 2. Agregar cola SIN repetir la canción actual
+  // El bug: Spotify repite el track actual al inicio de la cola
+  // Solución: saltar los primeros N elementos idénticos al actual
+  const queue = qData?.queue || [];
+  let skip = 0;
+  // Saltar duplicados iniciales del track actual
+  while(skip < queue.length && current && queue[skip].id === current.id){
+    skip++;
+  }
+  // Tomar hasta 7 canciones únicas de la cola
+  const seen = new Set(current ? [current.id] : []);
+  queue.slice(skip).forEach(t => {
+    if(items.length < 8 && !seen.has(t.id)){
+      seen.add(t.id);
+      items.push(t);
+    }
+  });
+
+  if(items.length){
+    list.innerHTML = items.map((t, i) => `
+      <div class="track-item${t._current?' playing':''}"
+           onclick="${t._current ? '' : `spPlayUri('${t.uri}')`}"
+           style="cursor:${t._current?'default':'pointer'}">
+        <div class="track-num" style="color:${t._current?'var(--green)':'var(--text3)'}">
+          ${t._current ? '♪' : i}
+        </div>
+        <div class="track-thumb">
+          ${t.album?.images?.[2]
+            ? `<img src="${t.album.images[2].url}">`
+            : `<span style="font-size:16px">🎵</span>`}
+        </div>
+        <div class="track-details">
+          <div class="track-n" style="color:${t._current?'var(--green)':'var(--text)'}">
+            ${t.name}
+            ${t._current ? '<span style="font-size:10px;color:var(--green);margin-left:6px">▶ ahora</span>' : ''}
+          </div>
+          <div class="track-a">${t.artists?.map(a=>a.name).join(', ') || ''}</div>
+        </div>
+        <div class="track-dur">${fmtTime(Math.round((t.duration_ms||0)/1000))}</div>
+      </div>`).join('');
+  } else {
+    list.innerHTML = `<div style="padding:20px;color:var(--text3);text-align:center;font-size:13px;">
+      Cola vacía — reproduce una canción para ver las siguientes
+    </div>`;
+  }
+}
+
+// ── Dispositivo HDMI local (raspotify/librespot) ─────────────
+// Para reproducir audio en un dispositivo:
+//   curl -sL https://dtcooper.github.io/raspotify/install.sh | sh
+// Configurar nombre en /etc/raspotify/conf: DEVICE_NAME="Mi Casa Pi"
+// Iniciar: sudo systemctl start raspotify
+
+async function spGetDevices(){
+  if(!cfg.spToken) return;
+  const d=await spFetch('/me/player/devices');
+  const list=document.getElementById('sp-devices-list');
+  if(d && d.devices && d.devices.length){
+    // Auto-seleccionar el primer dispositivo activo, o el primero disponible
+    const active = d.devices.find(x=>x.is_active) || d.devices[0];
+    if(!activeDeviceId) {
+      activeDeviceId = active.id;
+      toast('🔊', 'Dispositivo: ' + active.name);
+    }
+    list.innerHTML=d.devices.map(dev=>{
+      const selected = dev.id === activeDeviceId;
+      return `<div onclick="selectDevice('${dev.id}','${dev.name.replace(/'/g,"\'")}')"
+        style="display:flex;align-items:center;gap:10px;padding:10px 12px;
+               border-radius:10px;cursor:pointer;margin-bottom:4px;
+               background:${selected?'rgba(110,189,138,0.1)':'transparent'};
+               border:1px solid ${selected?'rgba(110,189,138,0.4)':'var(--border)'};
+               transition:all 0.2s;">
+        <span style="font-size:22px;">${dev.type==='Computer'?'💻':dev.type==='Smartphone'?'📱':dev.name.toLowerCase().includes('pi')||dev.name.toLowerCase().includes('casa')?'🖥️':'🔊'}</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:${selected?'var(--green)':'var(--text)'};">${dev.name}</div>
+          <div style="font-size:11px;color:var(--text3);">${dev.type} · ${dev.is_active?'<span style="color:var(--green)">▶ Activo</span>':'Disponible'}</div>
+        </div>
+        ${selected?'<span style="font-size:11px;color:var(--green);font-weight:600;">✓ SELECCIONADO</span>':'<span style="font-size:11px;color:var(--text3);">Toca para usar</span>'}
+      </div>`;
+    }).join('');
+  } else {
+    list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:12px;">Sin dispositivos encontrados.<br>Abre Spotify en tu teléfono o computadora y toca una canción.</div>';
+  }
+}
+
+function selectDevice(id, name){
+  activeDeviceId = id;
+  // Transferir reproducción a este dispositivo
+  spFetch('/me/player','PUT',{device_ids:[id], play:false});
+  toast('🔊','Dispositivo: ' + name);
+  spGetDevices(); // refrescar la lista para mostrar seleccionado
+}
+
+async function spPlayUri(uri){
+  if(!cfg.spToken) return;
+  // Si no hay dispositivo seleccionado, buscar uno primero
+  if(!activeDeviceId){
+    const d = await spFetch('/me/player/devices');
+    if(d && d.devices && d.devices.length){
+      const dev = d.devices.find(x=>x.is_active) || d.devices[0];
+      activeDeviceId = dev.id;
+      toast('🔊','Usando: ' + dev.name);
+    } else {
+      toast('⚠️','Abre Spotify en tu teléfono primero');
+      return;
+    }
+  }
+  // Reproducir UN solo track — sin duplicar en la cola
+  // offset:0 garantiza que empiece desde el inicio sin repetir
+  await spFetch('/me/player/play?device_id='+activeDeviceId,'PUT',{
+    uris: [uri]   // solo la URI seleccionada, no un array duplicado
+  });
+  setTimeout(spGetCurrentTrack, 1000);
+  setTimeout(spGetQueue, 2500);  // esperar 2.5s para que Spotify actualice la cola
+}
+
+async function spSearch(){
+  const q=document.getElementById('sp-search-input').value.trim();
+  if(!q) return;
+  if(!cfg.spToken){ toast('⚠️','Conecta Spotify primero'); return; }
+  const d=await spFetch(`/search?q=${encodeURIComponent(q)}&type=track&limit=5`);
+  const res=document.getElementById('sp-search-results');
+  if(d && d.tracks && d.tracks.items.length){
+    res.innerHTML=d.tracks.items.map(t=>`
+      <div class="track-item" onclick="spPlayUri('${t.uri}')">
+        <div class="track-thumb">${t.album?.images?.[2]?`<img src="${t.album.images[2].url}">`:t.name[0]}</div>
+        <div class="track-details">
+          <div class="track-n">${t.name}</div>
+          <div class="track-a">${t.artists.map(a=>a.name).join(', ')}</div>
+        </div>
+        <button class="btn" style="font-size:11px;padding:4px 10px;flex-shrink:0;" onclick="event.stopPropagation();spPlayUri('${t.uri}')">▶ Play</button>
+      </div>`).join('');
+  } else {
+    res.innerHTML='<div style="color:var(--text3);font-size:13px;">Sin resultados</div>';
+  }
+}
+
+function loadDemoTrack(){
+  spPlaying=true;
+  spElapsed=67; spTotal=212;
+  document.getElementById('sp-track-name').textContent='Blinding Lights';
+  document.getElementById('sp-track-artist').textContent='The Weeknd';
+  document.getElementById('sp-track-album').textContent='After Hours';
+  document.getElementById('home-sp-track').textContent='Blinding Lights';
+  document.getElementById('home-sp-artist').textContent='The Weeknd';
+  document.getElementById('home-music-status').textContent='Blinding…';
+  updatePlayBtn(); updateProgress(); startProgressTimer();
+}
+
+function renderDemoQueue(){
+  const tracks=[
+    {n:'Save Your Tears',a:'The Weeknd',t:'3:35'},
+    {n:'Starboy',a:'The Weeknd ft. Daft Punk',t:'3:50'},
+    {n:'Can\'t Feel My Face',a:'The Weeknd',t:'3:34'},
+    {n:'Earned It',a:'The Weeknd',t:'4:10'},
+    {n:'Die For You',a:'The Weeknd',t:'4:20'},
+  ];
+  document.getElementById('sp-queue-list').innerHTML=tracks.map((t,i)=>`
+    <div class="track-item${i===0?' playing':''}">
+      <div class="track-num">${i===0?'♪':i+1}</div>
+      <div class="track-thumb">🎵</div>
+      <div class="track-details"><div class="track-n">${t.n}</div><div class="track-a">${t.a}</div></div>
+      <div class="track-dur">${t.t}</div>
+    </div>`).join('');
+}
+
+function renderDemoSearch(q){
+  const demos=[{n:'Demo: '+q,a:'Artista Demo',t:'3:30'},{n:q+' (Remix)',a:'DJ Demo',t:'4:00'}];
+  document.getElementById('sp-search-results').innerHTML=demos.map(t=>`
+    <div class="track-item">
+      <div class="track-thumb">🎵</div>
+      <div class="track-details"><div class="track-n">${t.n}</div><div class="track-a">${t.a}</div></div>
+      <button class="btn" style="font-size:11px;padding:4px 10px;flex-shrink:0;">▶ Play</button>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+function init(){
+  drawColorWheel();
+  buildSwatches();
+  loadWeather();
+  checkSpotifyToken();
+
+  // Restaurar selección de protocolo de foco en el modal
+  const protoSel = document.getElementById('light-protocol');
+  if(protoSel){
+    protoSel.value = cfg.lightProtocol;
+    toggleLightProtocol();
+  }
+  if(cfg.tuyaDeviceId) document.getElementById('tuya-device-id').value = cfg.tuyaDeviceId;
+  if(cfg.tuyaLocalKey) document.getElementById('tuya-local-key').value = cfg.tuyaLocalKey;
+  updateLightDeviceLabel();
+}
+
+
+// ════════════════════════════════════════
+//  PERFIL DE USUARIO
+// ════════════════════════════════════════
+
+// Cargar perfil guardado en localStorage
+function cargarPerfil(){
+  const nombre    = localStorage.getItem('perfil_nombre')    || '';
+  const apellido  = localStorage.getItem('perfil_apellido')  || '';
+  const nacimiento = localStorage.getItem('perfil_nacimiento') || '';
+
+  if(nombre)     document.getElementById('perfil-nombre').value     = nombre;
+  if(apellido)   document.getElementById('perfil-apellido').value   = apellido;
+  if(nacimiento) document.getElementById('perfil-nacimiento').value = nacimiento;
+
+  actualizarPerfil(nombre, apellido, nacimiento);
+}
+
+function previewPerfil(){
+  const nombre    = document.getElementById('perfil-nombre').value.trim();
+  const apellido  = document.getElementById('perfil-apellido').value.trim();
+  const nacimiento = document.getElementById('perfil-nacimiento').value;
+  actualizarPerfil(nombre, apellido, nacimiento);
+}
+
+function guardarPerfil(){
+  const nombre    = document.getElementById('perfil-nombre').value.trim();
+  const apellido  = document.getElementById('perfil-apellido').value.trim();
+  const nacimiento = document.getElementById('perfil-nacimiento').value;
+
+  if(!nombre){ toast('⚠️','Ingresa al menos tu nombre'); return; }
+
+  localStorage.setItem('perfil_nombre',     nombre);
+  localStorage.setItem('perfil_apellido',   apellido);
+  localStorage.setItem('perfil_nacimiento', nacimiento);
+
+  actualizarPerfil(nombre, apellido, nacimiento);
+  toast('✅', '¡Perfil guardado, ' + nombre + '!');
+  updateClock(); // Actualizar saludo inmediatamente
+}
+
+function actualizarPerfil(nombre, apellido, nacimiento){
+  const nombreCompleto = [nombre, apellido].filter(Boolean).join(' ') || 'Tu nombre';
+  const inicial = nombre ? nombre[0].toUpperCase() : '?';
+
+  // Avatar con inicial
+  const av = document.getElementById('perfil-avatar');
+  if(av) av.textContent = inicial;
+
+  // Nombre en tarjeta
+  const nd = document.getElementById('perfil-nombre-display');
+  if(nd) nd.textContent = nombreCompleto;
+
+  // Preview del saludo
+  const pg = document.getElementById('perfil-preview-greeting');
+  if(pg) pg.innerHTML = `Buenos días, <span style="color:var(--accent)">${nombre||'Tu nombre'}</span> 👋`;
+
+  // Fecha y edad
+  const fd = document.getElementById('perfil-fecha-display');
+  const ed = document.getElementById('perfil-edad-display');
+  const cb = document.getElementById('perfil-cumple-badge');
+  const pc = document.getElementById('perfil-proximo-card');
+  const pt = document.getElementById('perfil-proximo-texto');
+
+  if(nacimiento){
+    const hoy    = new Date();
+    const nac    = new Date(nacimiento);
+    const meses  = ['enero','febrero','marzo','abril','mayo','junio',
+                    'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const dia    = nac.getUTCDate();
+    const mes    = meses[nac.getUTCMonth()];
+    const anio   = nac.getUTCFullYear();
+
+    if(fd) fd.textContent = `${dia} de ${mes} de ${anio}`;
+
+    // Edad
+    let edad = hoy.getFullYear() - nac.getUTCFullYear();
+    const mDif = hoy.getMonth() - nac.getUTCMonth();
+    if(mDif < 0 || (mDif===0 && hoy.getDate() < dia)) edad--;
+    if(ed) ed.textContent = `${edad} años`;
+
+    // ¿Es hoy el cumpleaños?
+    const esCumple = hoy.getDate()===dia && hoy.getMonth()===nac.getUTCMonth();
+    if(cb) cb.style.display = esCumple ? 'block' : 'none';
+
+    // Próximo cumpleaños
+    if(pc) pc.style.display = 'block';
+    if(pt){
+      if(esCumple){
+        pt.innerHTML = `<span style="color:var(--gold);font-weight:600;">🎉 ¡Hoy es tu cumpleaños!</span><br><span style="font-size:12px;color:var(--text2);">¡Feliz cumpleaños ${nombre}! Que tengas un excelente día.</span>`;
+      } else {
+        const proxCumple = new Date(hoy.getFullYear(), nac.getUTCMonth(), dia);
+        if(proxCumple < hoy) proxCumple.setFullYear(hoy.getFullYear()+1);
+        const diasRestantes = Math.ceil((proxCumple - hoy)/(1000*60*60*24));
+        pt.innerHTML = `<span style="font-size:24px;font-weight:700;color:var(--accent);">${diasRestantes}</span> <span style="color:var(--text2);font-size:13px;">días para tu próximo cumpleaños</span><br><span style="font-size:12px;color:var(--text3);margin-top:4px;display:block;">${dia} de ${mes}</span>`;
+      }
+    }
+  } else {
+    if(fd) fd.textContent = '— Sin fecha de nacimiento —';
+    if(ed) ed.textContent = '';
+    if(cb) cb.style.display = 'none';
+    if(pc) pc.style.display = 'none';
+  }
+}
+
+// Verificar cumpleaños para el saludo del dashboard
+function esCumpleanios(){
+  const nacimiento = localStorage.getItem('perfil_nacimiento');
+  if(!nacimiento) return false;
+  const hoy = new Date();
+  const nac = new Date(nacimiento);
+  return hoy.getDate()===nac.getUTCDate() && hoy.getMonth()===nac.getUTCMonth();
+}
+
+function getNombre(){
+  return localStorage.getItem('perfil_nombre') || 'Bienvenido';
+}
+
+// ── ARRANQUE DIRECTO ─────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  cargarPerfil();
+  drawColorWheel();
+  buildSwatches();
+  updateClock();
+  setInterval(updateClock, 1000);
+  // Spotify: detecta code en URL o token en sessionStorage
+  checkSpotifyToken();
+  // Carga clima con geolocalización
+  loadWeather();
+  // Fondos personalizados por habitación + widgets redimensionables + noticias
+  await initBackgrounds();
+  showRoomBg('home');
+  initResizableWidgets();
+  loadNews();
+  // Aviso de configuración pendiente
+  setTimeout(() => {
+    if(!cfg.spToken){
+      toast('🎵','Ve a Música → Iniciar sesión con Spotify');
+    }
+    const falta = [];
+    if(!cfg.owmKey)   falta.push('🌤 OWM Key');
+    if(!cfg.sonoffIp) falta.push('💡 IP Sonoff');
+    if(!cfg.newsApiKey) falta.push('📰 NewsAPI Key');
+    if(falta.length)  toast('⚙️','Configura: ' + falta.join(' · '));
+  }, 2000);
+});
+</script>
+
+<script>
+// ── Registrar Service Worker (PWA offline) ────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(r => console.log('✅ SW registrado:', r.scope))
+      .catch(e => console.log('⚠️ SW error:', e));
+  });
+}
+
+// ── Prompt de instalación PWA ─────────────────────────────
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  // Mostrar botón de instalación en el topbar
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'flex';
+});
+
+function installPWA() {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  installPrompt.userChoice.then(r => {
+    if (r.outcome === 'accepted') toast('✅','App instalada en tu dispositivo');
+    installPrompt = null;
+    const btn = document.getElementById('install-btn');
+    if (btn) btn.style.display = 'none';
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  toast('🏠','Mi Casa Inteligente instalada');
+  installPrompt = null;
+});
+</script>
+</body>
+</html>
